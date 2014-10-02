@@ -2,7 +2,6 @@
 #include "raytracer.h"
 #include "definitions.h"
 
-using namespace Tmpl8;
 
 Plane::Plane(vec3 _V0, vec3 _V1, vec3 _V2)
 {
@@ -22,6 +21,8 @@ void Plane::Intersect(Ray& _Ray)
   {
     _Ray.t = t;
     _Ray.intersection.N = N;
+    _Ray.intersection.prim = this;
+    _Ray.intersection.position = _Ray.D * t + _Ray.O;
     if (material) _Ray.intersection.color = material->color;
   }
 }
@@ -39,6 +40,6 @@ void Plane::Draw2D()
     vec3 p1 = p0 + B * 10000.0f;
     vec3 p2 = p0 - B * 10000.0f;
     // connect these points with a line
-    Renderer::Line2D(p1.x, p1.z, p2.x, p2.z, 0xffffff);
+    Tmpl8::Renderer::Line2D(p1.x, p1.z, p2.x, p2.z, 0xffffff);
   }
 }

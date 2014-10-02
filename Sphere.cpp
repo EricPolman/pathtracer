@@ -6,6 +6,7 @@ using namespace Tmpl8;
 
 void Sphere::Intersect(Ray& _Ray)
 {
+  bool invertNormal = false;
   // find the intersection of a ray and a sphere
   // http://www.ccs.neu.edu/home/fell/CSU540/programs/RayTracingFormulas.htm
   float t = 1e34;
@@ -17,13 +18,17 @@ void Sphere::Intersect(Ray& _Ray)
     float t1 = (-b - sqrtf(d)) / (2 * a);
     float t2 = (-b + sqrtf(d)) / (2 * a);
     if ((t1 < t) && (t1 >= 0)) t = t1;
-    if ((t2 < t) && (t2 >= 0)) t = t2;
+    if ((t2 < t) && (t2 >= 0)) t = t2, invertNormal = true;;
   }
   // store distance in ray if smaller than previous found distance
   if (t < _Ray.t)
   {
     _Ray.t = t;
-    _Ray.intersection.N = vec3(0, 1, 0); // todo: determine normal at intersection
+    _Ray.intersection.position = _Ray.D * t + _Ray.O;
+    _Ray.intersection.prim = this;
+    _Ray.intersection.N = normalize(_Ray.intersection.position - P); 
+    if (invertNormal)
+      _Ray.intersection.N *= -1;
     if (material) _Ray.intersection.color = material->color;
   }
 }

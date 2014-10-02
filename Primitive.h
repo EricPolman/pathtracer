@@ -8,7 +8,7 @@ using namespace glm;
 class Primitive
 {
 public:
-  Primitive() : material(0) {}
+  Primitive() : material(new Material()) {}
   virtual void Intersect(Ray& _Ray) = 0;
   virtual void Draw2D() = 0;
   Material* material;				// primitive material

@@ -91,8 +91,8 @@ vec3 Renderer::Trace( Ray& _Ray )
 	float distance = _Ray.t;
 
 	// turn this into a greyscale value for now
-	float color = 1.0f - min( distance / 6, 1.0f );
-	return vec3( color, color, color );
+  vec3 color = _Ray.intersection.prim->material->Illuminate(*this, _Ray);
+	return color;
 }
 
 void Renderer::Render( )

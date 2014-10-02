@@ -3,16 +3,21 @@
 
 using namespace glm;
 
+class Primitive;
+
 class Intersection
 {
 public:
   vec3 N;							// normal at intersection point
   vec3 color;						// color at intersection point
+  vec3 position;
+  Primitive* prim;
 };
 
 class Ray
 {
 public:
+  Ray():t(1e34f){}
   // methods
   void Draw2D();
   // data members
