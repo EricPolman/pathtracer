@@ -37,7 +37,7 @@ Ray Camera::GenerateRay(int _X, int _Y)
   // generate a ray starting at the camera, going through a pixel
   Ray ray;
   ray.O = eyePos + right * (Random::value() - 0.5f) * (1.0f / 16.0f) + up * (Random::value() - 0.5f)* (1.0f / 16.0f);
-  ray.D = normalize(P - eyePos);
+  ray.D = normalize(P - ray.O);
   ray.t = 1e34;
   return ray;
 }

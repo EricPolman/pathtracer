@@ -120,6 +120,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoxLight.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -135,6 +136,7 @@
     <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoxLight.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="game.h" />
