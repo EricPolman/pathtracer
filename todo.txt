@@ -1,0 +1,40 @@
+GP1 tasks - To be implemented in the supplied platform
+
+- Add camera position / orientation
+- Add shadows
+  * Add a class for point lights
+- Make the application interactive
+  * Add controls
+  * Add a 'quick render' mode
+- Add the Phong shading model
+  * Add N dot L
+  * Add specular component
+  * Add ambient color
+  * Adjust material class
+- Add reflections
+  * Add visualization of normals
+- Add anti-aliasing
+- Add depth of field
+- Add recursive ray tracing
+- Add refraction
+  * Add fresnel
+  * Add absorption
+- Add diffuse reflections
+- Add soft shadows
+  * Add area lights
+- Add diffuse refractions
+- Add diffraction
+- Add triangle intersection
+- Add triangle mesh loading
+- Add a HDR skydome
+  * Add HDR image loading
+  * Find a suitable skydome
+  * Convert ray direction to texel location
+- Add SIMD intersection of 4 rays
+- Add texture mapping
+- Add ambient occlusion
+- Add path tracing
+  * Add diffuse bounce
+  * Add stochastic path transport
+  * Add Russian roulette
+- Add an acceleration structure
