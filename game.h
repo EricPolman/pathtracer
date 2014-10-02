@@ -5,9 +5,6 @@
 
 namespace Tmpl8 {
 
-#define SCRWIDTH	1024
-#define SCRHEIGHT	512
-
 class Surface;
 class Game
 {

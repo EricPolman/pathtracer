@@ -6,6 +6,7 @@
 #include "surface.h"
 #include "stdlib.h"
 #include "template.h"
+#include "definitions.h"
 
 using namespace Tmpl8;
 using namespace glm;
