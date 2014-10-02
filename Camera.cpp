@@ -17,10 +17,16 @@ void Camera::Set(vec3 _Pos, vec3 _Direction)
   // set position and view direction, then calculate screen corners
   eyePos = _Pos;
   V = _Direction;
-  p1 = vec3(-0.5f, -0.5f, -2.2f); // todo: calculate screen corners using P and V
-  p2 = vec3(0.5f, -0.5f, -2.2f); // todo: calculate screen corners using P and V
-  p3 = vec3(0.5f, 0.5f, -2.2f); // todo: calculate screen corners using P and V
-  p4 = vec3(-0.5f, 0.5f, -2.2f); // todo: calculate screen corners using P and V
+
+  right = glm::cross(V, glm::vec3(0, -1, 0));
+  up = glm::cross(V, right);
+  right = glm::normalize(right);
+  up = glm::normalize(up);
+
+  p1 = (-0.5f * right) + (-0.5f * up) + (V)+_Pos;
+  p2 = (0.5f * right) + (-0.5f * up) + (V)+_Pos;
+  p3 = (0.5f * right) + (0.5f * up) + (V)+_Pos;
+  p4 = (-0.5f * right) + (0.5f * up) + (V)+_Pos;
 }
 
 Ray Camera::GenerateRay(int _X, int _Y)

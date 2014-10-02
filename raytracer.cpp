@@ -10,6 +10,7 @@ using namespace glm;
 #include "raytracer.h"
 #include "game.h"
 #include "definitions.h"
+#include "Random.h"
 
 extern Surface* screen; // defined in template.cpp
 
@@ -76,7 +77,9 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-	camera.Set( vec3( 0, 0, -3 ), vec3( 0, 0, 1 ) );
+  camera.Set(vec3(0, 0, -3), vec3(0, 0, 1));
+  for (int i = 0; i < 100; ++i)
+    printf("asdf\n");
 }
 
 vec3 Renderer::Trace( Ray& _Ray )

@@ -27,6 +27,8 @@ extern "C"
 #include "surface.h"
 #include "template.h"
 #include "fcntl.h"
+#include "InputManager.h"
+#include <time.h>
 
 namespace Tmpl8 { 
 void NotifyUser( char* s )
@@ -93,9 +95,19 @@ int main( int argc, char **argv )
 	SDL_Texture* frameBuffer = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCRWIDTH, SCRHEIGHT );
 	int exitapp = 0;
 	game = new Game();
-	game->SetTarget( screen );
+  game->SetTarget(screen);
+
+  clock_t startTime, endTime;
+  clock_t clockTime;
+  startTime = endTime = clockTime = 0;
+  float fFrameTimer = 0;
+
 	while (!exitapp) 
-	{
+  {
+    endTime = clockTime;
+    clockTime = clock();
+    float fDeltaTime = (float)(clockTime - endTime) / CLOCKS_PER_SEC;
+
 		void* target = 0;
 		int pitch;
 		SDL_LockTexture( frameBuffer, NULL, &target, &pitch );
@@ -123,11 +135,12 @@ int main( int argc, char **argv )
 		// calculate frame time and pass it to game->Tick
 		LARGE_INTEGER start, end;
 		QueryPerformanceCounter( &start );
-		game->Tick( (float)lastftime );
+    game->Tick(fDeltaTime);
 		QueryPerformanceCounter( &end );
 		lastftime = float( end.QuadPart - start.QuadPart ) / float( ticksPS.QuadPart / 1000 );
 		// event loop
 		SDL_Event event;
+
 		while (SDL_PollEvent( &event )) 
 		{
 			switch (event.type)
@@ -139,26 +152,29 @@ int main( int argc, char **argv )
 				if (event.key.keysym.sym == SDLK_ESCAPE) 
 				{
 					exitapp = 1;
-					// find other keys here: http://sdl.beuc.net/sdl.wiki/SDLKey
+					// find other keys here: http://sdl.beuc.net/sdl.wiki/SDL_Keycode
 				}
-				game->KeyDown( event.key.keysym.scancode );
+        Input->SetKeyPressed(event.key.keysym.sym);
 				break;
-			case SDL_KEYUP:
-				game->KeyUp( event.key.keysym.scancode );
-				break;
-			case SDL_MOUSEMOTION:
-				game->MouseMove( event.motion.x, event.motion.y );
-				break;
-			case SDL_MOUSEBUTTONUP:
-				game->MouseUp( event.button.button );
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				game->MouseDown( event.button.button );
+      case SDL_KEYUP:
+        Input->SetKeyUp(event.key.keysym.sym);
+        break;
+      case SDL_MOUSEMOTION:
+        Input->SetMousePosition(event.motion.x, event.motion.y);
+        Input->SetMouseMovement(event.motion.xrel, event.motion.yrel);
+        break;
+      case SDL_MOUSEBUTTONUP:
+        Input->SetMouseButtonUp(event.button.button);
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        Input->SetMouseButtonPressed(event.button.button);
+        break;
 				break;
 			default:
 				break;
 			}
-		}
+    }
+    Input->Update(fDeltaTime);
 	}
 	game->Shutdown();
 	SDL_Quit();

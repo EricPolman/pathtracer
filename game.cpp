@@ -1,15 +1,19 @@
 // Template for GP1, version 2
 // IGAD/NHTV - Jacco Bikker - 2006-2014
 
+#include "Random.h"
 #include "string.h"
 #include "game.h"
 #include "surface.h"
 #include "stdlib.h"
 #include "template.h"
 #include "definitions.h"
+#include "InputManager.h"
 
 using namespace Tmpl8;
 using namespace glm;
+
+std::_Bind<false, void, Distribution, Engine> Random::_r(std::bind(Distribution(0.0f, 1.0f), Engine((int)time(NULL))));
 
 #include "raytracer.h"
 
@@ -37,6 +41,11 @@ void Game::Tick( float dt )
 	{
 		renderer.Render( i );					
 	}
+
+  if (Input->IsKeyDown(SDLK_LEFT))
+  {
+    renderer.camera.eyePos.x -= 0.005f;
+  }
 }
 
 
