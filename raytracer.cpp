@@ -129,7 +129,17 @@ void Renderer::Render( )
       // trace primary ray
       vec3 color = Trace(ray);
       // visualize intersection result
-      screen->Plot(x, y, ConvertColor(color));
+      frameCounter[y][x] += 1;
+      accumulatedColours[y][x] += color;
+    }
+  }
+
+  for (int y = 0; y < SCRHEIGHT; y++)
+  {
+    for (int ix = 0; ix < SCRWIDTH / 2; ++ix)
+    {
+      screen->GetBuffer()[ix + y * (SCRWIDTH)] =
+        ConvertColor(accumulatedColours[y][ix] * (1.0f / frameCounter[y][ix]));
     }
   }
 }

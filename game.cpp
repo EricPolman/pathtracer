@@ -51,34 +51,50 @@ void Game::Tick( float dt )
   mouseMovement.x /= SCRWIDTH;
   mouseMovement.y /= SCRHEIGHT;
 
+  bool movement = false;
+
   if (Input->IsKeyDown(SDLK_LEFT))
   {
     renderer.camera.eyePos.x -= dt;
+    movement = true;
   }
   if (Input->IsKeyDown(SDLK_RIGHT))
   {
     renderer.camera.eyePos.x += dt;
+    movement = true;
   }
   if (Input->IsKeyDown(SDLK_UP))
   {
     renderer.camera.eyePos.z += dt;
+    movement = true;
   }
   if (Input->IsKeyDown(SDLK_DOWN))
   {
     renderer.camera.eyePos.z -= dt;
+    movement = true;
   }
   if (Input->IsKeyDown(SDLK_KP_4))
   {
     renderer.camera.eyePos.y -= dt;
+    movement = true;
   }
   if (Input->IsKeyDown(SDLK_KP_1))
   {
     renderer.camera.eyePos.y += dt;
+    movement = true;
   }
   
   if (Input->IsMouseButtonDown(SDL_BUTTON_RIGHT))
   {
     renderer.camera.rotation *= glm::angleAxis(dt * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(dt * mouseMovement.y * 4000, vec3(-1, 0, 0));
+    movement = true;
+  }
+
+  if (movement)
+  {
+    memset(&renderer.firstRenders[0], 0, sizeof(renderer.firstRenders));
+    memset(renderer.frameCounter[0], 0, sizeof(renderer.frameCounter));
+    memset(renderer.accumulatedColours[0], 0, sizeof(renderer.accumulatedColours));
   }
 
   renderer.camera.Set(renderer.camera.eyePos, renderer.camera.rotation * vec3(0,0,1));
