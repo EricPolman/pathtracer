@@ -17,7 +17,7 @@ public:
 	Renderer();
 	// methods
 	vec3 Trace( Ray& _Ray );
-	void Render( int _Y );
+	void Render( );
 	// data members
 	Scene scene;
 	Camera camera;

@@ -95,28 +95,43 @@ vec3 Renderer::Trace( Ray& _Ray )
 	return vec3( color, color, color );
 }
 
-void Renderer::Render( int _Y )
+void Renderer::Render( )
 {
-	// ray trace one line of pixels of the final image
-	for ( int x = 0; x < (SCRWIDTH / 2); x++ )
-	{
-		// generate primary ray
-		Ray ray = camera.GenerateRay( x, _Y );
-		// trace primary ray
-		vec3 color = Trace( ray );
-		// visualize ray in 2D if y == 0, and for every 16th pixel
-		if ((_Y == (SCRHEIGHT / 2)) && ((x % 16) == 0)) 
-		{
-			// clip to debug panel
-			screen->ClipTo( SCRWIDTH / 2, 0, SCRWIDTH - 1, SCRHEIGHT - 1 );
-			// draw ray
-			ray.Draw2D();
-			// reset clip window
-			screen->ClipTo( 0, 0, SCRWIDTH - 1, SCRHEIGHT - 1 );
-		}
-		// visualize intersection result
-		screen->Plot( x, _Y, ConvertColor( color ) );
-	}
+  // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
+  int midY = SCRHEIGHT / 2;
+  Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
+  Trace(midRay);
+  camera.focusDistance = midRay.t;
+
+  for (int x = 0; x < (SCRWIDTH / 2); x++)
+  {
+    if (((x % 16) == 0))
+    {
+      Ray ray = camera.GenerateRay(x, midY);
+      Trace(ray);
+      // clip to debug panel
+      screen->ClipTo(SCRWIDTH / 2, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+      // draw ray
+      ray.Draw2D();
+      // reset clip window
+      screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+    }
+  }
+
+  screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+  for (int y = 0; y < SCRHEIGHT; y++)
+  {
+    // ray trace one line of pixels of the final image
+    for (int x = 0; x < (SCRWIDTH / 2); x++)
+    {
+      // generate primary ray
+      Ray ray = camera.GenerateRay(x, y);
+      // trace primary ray
+      vec3 color = Trace(ray);
+      // visualize intersection result
+      screen->Plot(x, y, ConvertColor(color));
+    }
+  }
 }
 
 // EOF

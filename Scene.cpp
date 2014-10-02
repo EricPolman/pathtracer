@@ -12,7 +12,8 @@ Scene::Scene()
   primList[primCount++] = new Sphere(vec3(-2.5f, 0, 0), 1);
   primList[primCount++] = new Sphere(vec3(0, 0, 0), 1);
   primList[primCount++] = new Sphere(vec3(2.5f, 0, 0), 1);
-  primList[primCount++] = new Plane(vec3(0, 1, 0), 0.7f);
+
+  primList[primCount++] = new Plane(vec3(0, -1, 0), -0.7f);
   primList[primCount++] = new Plane(vec3(0, 0, -1), -1.5f);
 }
 

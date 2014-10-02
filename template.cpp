@@ -169,7 +169,6 @@ int main( int argc, char **argv )
       case SDL_MOUSEBUTTONDOWN:
         Input->SetMouseButtonPressed(event.button.button);
         break;
-				break;
 			default:
 				break;
 			}
