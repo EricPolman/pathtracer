@@ -17,8 +17,8 @@ public:
 	// constructor
 	Renderer();
 	// methods
-	vec3 Trace( Ray& _Ray );
-	void Render( );
+  vec3 Trace(Ray& _Ray, int depth = 0, unsigned int _Debug = 0);
+	void Render();
 	// data members
 	Scene scene;
 	Camera camera;

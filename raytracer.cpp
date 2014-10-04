@@ -77,12 +77,10 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 0, -3), vec3(0, 0, 1));
-  for (int i = 0; i < 100; ++i)
-    printf("asdf\n");
+  camera.Set(vec3(0, 0, -5), vec3(0, 0, 1));
 }
 
-vec3 Renderer::Trace( Ray& _Ray )
+vec3 Renderer::Trace( Ray& _Ray, int depth, unsigned int _Debug)
 {
 	// intersect a single ray with the objects in the scene
 	scene.Intersect( _Ray );
@@ -90,8 +88,23 @@ vec3 Renderer::Trace( Ray& _Ray )
 	// get the distance of the nearest intersection
 	float distance = _Ray.t;
 
-	// turn this into a greyscale value for now
-  vec3 color = _Ray.intersection.prim->material->Illuminate(*this, _Ray);
+  if (_Ray.t > 1e33)
+    return vec3();
+
+  if (depth > MAX_TRACE_DEPTH)
+    return _Ray.intersection.color;
+
+  vec3 color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, depth, _Debug);
+
+  if (_Debug)
+  {
+    // clip to debug panel
+    screen->ClipTo(SCRWIDTH / 2, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+    // draw ray
+    _Ray.Draw2D(_Debug);
+    // reset clip window
+    screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+  }
 	return color;
 }
 
@@ -105,16 +118,10 @@ void Renderer::Render( )
 
   for (int x = 0; x < (SCRWIDTH / 2); x++)
   {
-    if (((x % 16) == 0))
+    if (((x % 32) == 0))
     {
       Ray ray = camera.GenerateRay(x, midY);
-      Trace(ray);
-      // clip to debug panel
-      screen->ClipTo(SCRWIDTH / 2, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
-      // draw ray
-      ray.Draw2D();
-      // reset clip window
-      screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+      Trace(ray, 0, 0xFFFFFF);
     }
   }
 

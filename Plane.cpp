@@ -20,9 +20,9 @@ void Plane::Intersect(Ray& _Ray)
   if ((t < _Ray.t) && (t >= 0))
   {
     _Ray.t = t;
-    _Ray.intersection.N = N;
-    _Ray.intersection.prim = this;
     _Ray.intersection.position = _Ray.D * t + _Ray.O;
+    _Ray.intersection.prim = this;
+    _Ray.intersection.N = N;
     if (material) _Ray.intersection.color = material->color;
   }
 }

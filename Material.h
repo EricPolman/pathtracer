@@ -15,9 +15,11 @@ class Material
 {
 public:
   enum Type { UNLIT, LAMBERT, PHONG, MIRROR, DIELECTRIC, LIGHT };
-  Material():color(1,1,1), type(LAMBERT){}
+  Material():color(1,1,1), refractionIndex(1), type(LAMBERT){}
   vec3 color;						// color of material
   Type type;
+  float reflection;
+  float refractionIndex;
 
-  vec3 Illuminate(Renderer&, Ray&);
+  vec3 Illuminate(Renderer&, Ray&, int _Depth, unsigned int _Debug = 0);
 };

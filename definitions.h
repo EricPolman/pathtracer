@@ -36,3 +36,4 @@
 
 
 #define EPSILON		0.0001f
+#define MAX_TRACE_DEPTH 3

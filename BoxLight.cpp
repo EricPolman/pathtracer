@@ -2,24 +2,50 @@
 #include "definitions.h"
 #include "raytracer.h"
 
+const static int SAMPLES_X = 2;
+const static int SAMPLES_Y = 2;
+const static int SAMPLES_Z = 2;
+const static int SAMPLES_PER_POINT = 1;
+const static int SAMPLES_TOTAL = SAMPLES_X * SAMPLES_Y * SAMPLES_Z * SAMPLES_PER_POINT;
 
 float BoxLight::Shade(Tmpl8::Renderer& _Renderer, Ray& _Ray)
 {
-  Ray shadowRay;
-  shadowRay.D = position - _Ray.intersection.position;
-  float length = shadowRay.D.length();
-  shadowRay.D /= length;
-  shadowRay.O = _Ray.intersection.position + shadowRay.D * EPSILON;
-  _Renderer.scene.IntersectShadow(shadowRay, length);
+  float shade = 0;
+  const float xStepSize = size.x / (SAMPLES_X - 1);
+  const float yStepSize = size.y / (SAMPLES_Y - 1);
+  const float zStepSize = size.z / (SAMPLES_Z - 1);
 
-  if (shadowRay.t >= length || shadowRay.intersection.prim == this)
+  for (int x = 0; x < SAMPLES_X; ++x)
   {
-    return 1;
+    for (int y = 0; y < SAMPLES_Y; ++y)
+    {
+      for (int z = 0; z < SAMPLES_Z; ++z)
+      {
+        for (int s = 0; s < SAMPLES_PER_POINT; ++s)
+        {
+          Ray shadowRay;
+          vec3 offset(
+            -size.x / 2 + xStepSize*x + Random::value() * xStepSize,
+            -size.y / 2 + yStepSize*y + Random::value() * yStepSize,
+            -size.z / 2 + zStepSize*z + Random::value() * zStepSize);
+
+          shadowRay.D = (position + offset) - _Ray.intersection.position;
+          float length = shadowRay.D.length();
+          shadowRay.D /= length;
+
+          shadowRay.O = (_Ray.intersection.position) + shadowRay.D * EPSILON;
+          _Renderer.scene.IntersectShadow(shadowRay, length);
+
+          if (shadowRay.t >= length || shadowRay.intersection.prim == this)
+          {
+            shade += 1.0f / SAMPLES_TOTAL;
+          }
+        }
+      }
+    }
   }
-  else
-  {
-    return 0;
-  }
+
+  return shade;
 }
 
 

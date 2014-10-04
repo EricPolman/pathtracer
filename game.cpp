@@ -90,6 +90,13 @@ void Game::Tick( float dt )
     movement = true;
   }
 
+  if (Input->IsKeyDown(SDLK_r))
+  {
+    renderer.scene.primList[1]->material->refractionIndex += 0.25f;
+    printf("%f\n", renderer.scene.primList[1]->material->refractionIndex);
+  }
+  
+
   if (movement)
   {
     memset(&renderer.firstRenders[0], 0, sizeof(renderer.firstRenders));

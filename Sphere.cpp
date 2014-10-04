@@ -18,13 +18,16 @@ void Sphere::Intersect(Ray& _Ray)
     float t1 = (-b - sqrtf(d)) / (2 * a);
     float t2 = (-b + sqrtf(d)) / (2 * a);
     if ((t1 < t) && (t1 >= 0)) t = t1;
-    if ((t2 < t) && (t2 >= 0)) t = t2, invertNormal = true;;
+    if ((t2 < t) && (t2 >= 0))
+    {
+      t = t2, invertNormal = true;
+    }
   }
   // store distance in ray if smaller than previous found distance
   if (t < _Ray.t)
   {
     _Ray.t = t;
-    _Ray.intersection.position = _Ray.D * t + _Ray.O;
+    _Ray.intersection.position = _Ray.O + _Ray.D * t;
     _Ray.intersection.prim = this;
     _Ray.intersection.N = normalize(_Ray.intersection.position - P); 
     if (invertNormal)
