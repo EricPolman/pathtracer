@@ -21,5 +21,5 @@ public:
   float reflection;
   float refractionIndex;
 
-  vec3 Illuminate(Renderer&, Ray&, int _Depth, unsigned int _Debug = 0);
+  vec3 Illuminate(Renderer&, Ray&, int _Depth, bool _PathTraced, unsigned int _Debug = 0);
 };

@@ -3,6 +3,55 @@
 #include "Ray.h"
 #include "BoxLight.h"
 
+// http://pathtracing.wordpress.com/2011/03/03/cosine-weighted-hemisphere/
+vec3 CosWeightedRandomHemisphereDirection2(vec3 n)
+{
+  float r1 = Random::value();
+  float r2 = Random::value();
+
+  float  theta = acosf(sqrtf(1.0f - r1));
+  float  phi = 2.0f * PI * r2;
+
+  float xs = sinf(theta) * cosf(phi);
+  float ys = cosf(theta);
+  float zs = sinf(theta) * sinf(phi);
+
+  vec3 y(n.x, n.y, n.z);
+  vec3 h = y;
+  if (fabs(h.x) <= fabs(h.y) && fabs(h.x) <= fabs(h.z))
+    h.x = 1.0;
+  else if (fabs(h.y) <= fabs(h.x) && fabs(h.y) <= fabs(h.z))
+    h.y = 1.0;
+  else
+    h.z = 1.0;
+
+  vec3 x = normalize(cross(h, y));
+  vec3 z = normalize(cross(x, y));
+
+  vec3 direction = xs * x + ys * y + zs * z;
+  return normalize(direction);
+}
+
+vec3 IlluminateLambertPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material, unsigned int _Depth)
+{
+ /* vec3 rndVec(-0.5f + Random::value(), -0.5f + Random::value(), -0.5f + Random::value());
+  rndVec = normalize(rndVec);
+  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+  if (rndVecDotN < 0)
+  {
+    rndVec = -rndVec;
+  }
+  rndVecDotN = dot(rndVec, _Ray.intersection.N);*/
+  vec3 rndVec = CosWeightedRandomHemisphereDirection2(_Ray.intersection.N);
+  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+
+  Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
+
+  vec3 color = _Renderer.TracePath(newRay, _Depth + 1, 0) * rndVecDotN * _Material.color;
+  return color;
+}
+
+
 vec3 IlluminateLambert(Renderer& _Renderer, Ray& _Ray, Material& _Material)
 {
   vec3 color;
@@ -71,6 +120,35 @@ vec3 IlluminatePhong(Renderer& _Renderer, Ray& _Ray, Material& _Material)
   return color;
 }
 
+
+vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material, unsigned int _Depth)
+{
+  /*vec3 rndVec(-0.5f + Random::value(), -0.5f + Random::value(), -0.5f + Random::value());
+  rndVec = normalize(rndVec);
+  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+  if (rndVecDotN < 0)
+  {
+    rndVec = -rndVec;
+  }
+  rndVecDotN = dot(rndVec, _Ray.intersection.N);*/
+  vec3 reflectionVector = normalize(reflect(_Ray.D, _Ray.intersection.N));
+  vec3 rndVec = CosWeightedRandomHemisphereDirection2(reflectionVector);
+  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+  if (rndVecDotN < 0)
+  {
+    rndVec = -rndVec;
+    rndVecDotN *= -1;
+  }
+  
+  Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, rndVec);
+
+  vec3 color = _Renderer.TracePath(recursiveRay, _Depth + 1, 0);
+  
+  float spec = powf(rndVecDotN, 50) + rndVecDotN;
+
+  return color * _Material.color * spec;
+}
+
 vec3 IlluminateMirror(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _Depth, unsigned int _Debug = 0)
 {
   vec3 reflectionVector = glm::normalize(glm::reflect(_Ray.D, _Ray.intersection.N));
@@ -88,14 +166,31 @@ vec3 IlluminateMirror(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _
   return col * _Material.reflection * _Material.color;
 }
 
+vec3 IlluminateMirrorPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _Depth, unsigned int _Debug = 0)
+{
+  vec3 reflectionVector = glm::normalize(glm::reflect(_Ray.D, _Ray.intersection.N));
+  Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);
+  // +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.2f);
+
+  vec3 color = _Renderer.TracePath(recursiveRay, _Depth + 1, 0);
+  return color * _Material.color;
+}
 
 vec3 IlluminateDielectric(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _Depth, unsigned int _Debug = 0)
 {
-  vec3 color; 
+  vec3 color;
 
-  const float n1 = _Ray.lastRefractiveIndex; // Refractive index for air
-  //const float n1 = 1.000277f; // Refractive index for air
-  const float n2 = _Material.refractionIndex;
+  float n1, n2;
+  if (_Ray.lastRefractiveIndex == _Material.refractionIndex) // Leaving object
+  {
+    n1 = _Ray.lastRefractiveIndex;
+    n2 = 1.000277f;
+  }
+  else // Entering object
+  {
+    n1 = _Ray.lastRefractiveIndex;
+    n2 = _Material.refractionIndex;
+  }
 
   const float tOverI = n1 / n2;
   const float iOverT = n1 / n2;
@@ -130,7 +225,7 @@ vec3 IlluminateDielectric(Renderer& _Renderer, Ray& _Ray, Material& _Material, i
       col = _Renderer.Trace(recursiveRay, _Depth + 1, _Debug);
     }
 
-    vec3 absorbance = recursiveRay.intersection.color * 0.05f * -recursiveRay.t; // Constant should be 0.15f
+    vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f
     vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
 
     color += col * transparency * refrCoeff;
@@ -153,26 +248,127 @@ vec3 IlluminateDielectric(Renderer& _Renderer, Ray& _Ray, Material& _Material, i
   return color;
 }
 
-vec3 Material::Illuminate(Renderer& _Renderer, Ray& _Ray, int _Depth, unsigned int _Debug)
+
+vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _Depth, unsigned int _Debug = 0)
 {
-  switch(type)
+  vec3 color;
+
+  float n1, n2;
+  bool leaving = false;
+  if (_Ray.lastRefractiveIndex == _Material.refractionIndex) // Leaving object
   {
-  case LAMBERT:
-    return IlluminateLambert(_Renderer, _Ray, *this);
-    break;
-  case PHONG:
-    return IlluminatePhong(_Renderer, _Ray, *this);
-    break;
-  case MIRROR:
-    return IlluminateMirror(_Renderer, _Ray, *this, _Depth, _Debug);
-    break;
-  case DIELECTRIC:
-    return IlluminateDielectric(_Renderer, _Ray, *this, _Depth, _Debug);
-    break;
-  case LIGHT:
-  case UNLIT:
-  default:
-    return color;
-    break;
+    n1 = _Ray.lastRefractiveIndex;
+    n2 = 1.000277f;
+    leaving = true;
+  }
+  else // Entering object
+  {
+    n1 = _Ray.lastRefractiveIndex;
+    n2 = _Material.refractionIndex;
+    leaving = false;
+  }
+
+  const float tOverI = n1 / n2;
+  const float iOverT = n1 / n2;
+
+  const vec3& N = _Ray.intersection.N;
+  const float cosI = -glm::dot(N, _Ray.D); // cosine of incidence ray
+
+  // Fresnel term
+  const float r0 = ((n1 - n2) / (n1 + n2)) * ((n1 - n2) / (n1 + n2));
+  const float reflCoeff = r0 + (1 - r0) * powf(1 - cosI, 5); // Schlick's approx
+  const float refrCoeff = 1 - reflCoeff;
+
+  float rndVal = Random::value();
+  if (rndVal > reflCoeff)
+  {
+    const float cosT2 = 1.0f - (tOverI * tOverI) * (1.0f - (cosI * cosI));
+    if (cosT2 > 0.0f)
+    {
+      // vec3 T = -N * 
+      vec3 T = (tOverI * _Ray.D) + (tOverI * cosI - sqrtf(cosT2)) * N;
+      T = normalize(T);
+
+      Ray recursiveRay;
+      recursiveRay.D = T;
+
+      recursiveRay.O = _Ray.intersection.position + T * EPSILON;
+
+      vec3 col = _Renderer.TracePath(recursiveRay, _Depth + 1, _Debug);
+
+      if (leaving) // Absorp according to Beer's law
+      {
+        vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f
+        vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
+
+        color += col * _Material.color * transparency * refrCoeff;
+      }
+      else
+      {
+        color += col * _Material.color * refrCoeff;
+      }
+      //printf("%f\n", refrCoeff);
+    }
+  }
+  else
+  {
+    vec3 reflectionVector = glm::reflect(_Ray.D, _Ray.intersection.N);
+    Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);// +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.05f);
+
+    vec3 col = _Renderer.TracePath(recursiveRay, _Depth + 1, _Debug);
+    color += col * _Material.color * reflCoeff;
+  }
+  return color;
+}
+
+vec3 Material::Illuminate(Renderer& _Renderer, Ray& _Ray, int _Depth, bool _PathTraced, unsigned int _Debug)
+{
+  if (!_PathTraced)
+  {
+    switch (type)
+    {
+    case LAMBERT:
+      return IlluminateLambert(_Renderer, _Ray, *this);
+      break;
+    case PHONG:
+      return IlluminatePhong(_Renderer, _Ray, *this);
+      break;
+    case MIRROR:
+      return IlluminateMirror(_Renderer, _Ray, *this, _Depth, _Debug);
+      break;
+    case DIELECTRIC:
+      return IlluminateDielectric(_Renderer, _Ray, *this, _Depth, _Debug);
+      break;
+    case LIGHT:
+    case UNLIT:
+    default:
+      return color;
+      break;
+    }
+  }
+  else // Is pathtraced
+  {
+    switch (type)
+    {
+    case LAMBERT:
+      return IlluminateLambertPathTraced(_Renderer, _Ray, *this, _Depth);
+      break;
+    case PHONG:
+      return IlluminatePhongPathTraced(_Renderer, _Ray, *this, _Depth);
+      break;
+    case MIRROR:
+      return IlluminateMirrorPathTraced(_Renderer, _Ray, *this, _Depth, _Debug);
+      break;
+    case DIELECTRIC:
+      return IlluminateDielectricPathTraced(_Renderer, _Ray, *this, _Depth, _Debug);
+      break;
+    case LIGHT:
+      return color;
+      break;
+    case UNLIT:
+    default:
+      return color;
+      break;
+    }
   }
 }

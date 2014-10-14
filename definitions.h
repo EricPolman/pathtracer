@@ -37,3 +37,8 @@
 
 #define EPSILON		0.0001f
 #define MAX_TRACE_DEPTH 3
+
+
+#define ROULETTE_FACTOR 30.0f
+
+typedef unsigned long Pixel;

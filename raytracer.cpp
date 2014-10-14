@@ -11,6 +11,8 @@ using namespace glm;
 #include "game.h"
 #include "definitions.h"
 #include "Random.h"
+#include <thread>
+#include <functional>
 
 extern Surface* screen; // defined in template.cpp
 
@@ -77,16 +79,16 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 0, -5), vec3(0, 0, 1));
+  camera.Set(vec3(0, -1.5f, -7), vec3(0, 0, 1));
 }
 
-vec3 Renderer::Trace( Ray& _Ray, int depth, unsigned int _Debug)
+vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
 {
-	// intersect a single ray with the objects in the scene
-	scene.Intersect( _Ray );
+  // intersect a single ray with the objects in the scene
+  scene.Intersect(_Ray);
 
-	// get the distance of the nearest intersection
-	float distance = _Ray.t;
+  // get the distance of the nearest intersection
+  float distance = _Ray.t;
 
   if (_Ray.t > 1e33)
     return vec3();
@@ -94,7 +96,7 @@ vec3 Renderer::Trace( Ray& _Ray, int depth, unsigned int _Debug)
   if (depth > MAX_TRACE_DEPTH)
     return _Ray.intersection.color;
 
-  vec3 color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, depth, _Debug);
+  vec3 color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, depth, false, _Debug);
 
   if (_Debug)
   {
@@ -105,7 +107,64 @@ vec3 Renderer::Trace( Ray& _Ray, int depth, unsigned int _Debug)
     // reset clip window
     screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
   }
-	return color;
+  return color;
+}
+vec3 Renderer::TracePath(Ray& _Ray, int depth, unsigned int _Debug)
+{
+  // intersect a single ray with the objects in the scene
+  scene.Intersect(_Ray);
+
+  // get the distance of the nearest intersection
+  float distance = _Ray.t;
+
+  if (_Ray.t > 1e33f)
+    return vec3();
+
+  //if (depth > MAX_TRACE_DEPTH)
+  //  return _Ray.intersection.color;
+  vec3 color;
+  float probability = Random::value();
+  if (probability < (1.0f - depth / ROULETTE_FACTOR)) // Kill chance
+  {
+    color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, depth, true, _Debug) / (1.0f - depth / ROULETTE_FACTOR);
+  }
+
+  if (_Debug)
+  {
+    // clip to debug panel
+    screen->ClipTo(SCRWIDTH / 2, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+    // draw ray
+    _Ray.Draw2D(_Debug);
+    // reset clip window
+    screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
+  }
+  return color;
+}
+
+void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer, int _linesToRender)
+{
+  for (int y = _Y; y < _Y + _linesToRender; ++y)
+  {
+    for (int x = 0; x < (SCRWIDTH / 2); ++x)
+    {
+      // generate primary ray
+      Ray ray = _Renderer->camera.GenerateRay(x, y);
+      // trace primary ray
+      vec3 color = _Renderer->TracePath(ray, 1);
+      // visualize ray in 2D if y == 0, and for every 16th pixel
+
+      // visualize intersection result
+      //_Screen->Plot(x, y, ConvertColor(color));
+
+      _Renderer->accumulatedColours[y][x] += color;
+      _Renderer->frameCounter[y][x] += 1;
+    }
+    for (int ix = 0; ix < SCRWIDTH / 2; ++ix)
+    {
+      _Buffer[ix + y * (SCRWIDTH)] =
+        ConvertColor(_Renderer->accumulatedColours[y][ix] * (1.0f / _Renderer->frameCounter[y][ix]));
+    }
+  }
 }
 
 void Renderer::Render( )
@@ -121,33 +180,20 @@ void Renderer::Render( )
     if (((x % 32) == 0))
     {
       Ray ray = camera.GenerateRay(x, midY);
-      Trace(ray, 0, 0xFFFFFF);
+      TracePath(ray, 0, 0xFFFFFF);
     }
   }
 
-  screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
-  for (int y = 0; y < SCRHEIGHT; y++)
-  {
-    // ray trace one line of pixels of the final image
-    for (int x = 0; x < (SCRWIDTH / 2); x++)
-    {
-      // generate primary ray
-      Ray ray = camera.GenerateRay(x, y);
-      // trace primary ray
-      vec3 color = Trace(ray);
-      // visualize intersection result
-      frameCounter[y][x] += 1;
-      accumulatedColours[y][x] += color;
-    }
-  }
+  const static int THREADS = 4;
+  std::thread threads[THREADS];
 
-  for (int y = 0; y < SCRHEIGHT; y++)
+  for (int t = 0; t < THREADS; ++t)
   {
-    for (int ix = 0; ix < SCRWIDTH / 2; ++ix)
-    {
-      screen->GetBuffer()[ix + y * (SCRWIDTH)] =
-        ConvertColor(accumulatedColours[y][ix] * (1.0f / frameCounter[y][ix]));
-    }
+    threads[t] = std::thread(&Renderer::RenderLinePathTraced, SCRHEIGHT / THREADS * t, screen->GetBuffer(), this, SCRHEIGHT / THREADS);
+  }
+  for (int t = 0; t < THREADS; t++)
+  {
+    threads[t].join();
   }
 }
 

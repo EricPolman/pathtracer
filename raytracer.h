@@ -18,7 +18,9 @@ public:
 	Renderer();
 	// methods
   vec3 Trace(Ray& _Ray, int depth = 0, unsigned int _Debug = 0);
+  vec3 TracePath(Ray& _Ray, int depth = 0, unsigned int _Debug = 0);
 	void Render();
+  static void RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer, int _linesToRender);
 	// data members
 	Scene scene;
 	Camera camera;

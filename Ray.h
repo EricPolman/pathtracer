@@ -24,7 +24,7 @@ public:
   // data members
   vec3 O;							// ray origin
   vec3 D;							// normalized ray direction
-  float t;						// distance of intersection along ray ( >= 0 )
+  float t, u, v;						// distance of intersection along ray ( >= 0 )
   float lastRefractiveIndex;
   Intersection intersection;		// data for closest intersection point
 };

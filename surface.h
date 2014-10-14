@@ -2,6 +2,7 @@
 // IGAD/NHTV - Jacco Bikker - 2006-2014
 
 #pragma once
+#include "definitions.h"
 
 namespace Tmpl8 {
 
@@ -9,7 +10,6 @@ namespace Tmpl8 {
 #define GREENMASK (0x00ff00)
 #define BLUEMASK (0x0000ff)
 
-typedef unsigned long Pixel;
 
 inline Pixel AddBlend( Pixel a_Color1, Pixel a_Color2 )
 {

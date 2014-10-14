@@ -12,5 +12,6 @@ public:
   void Draw2D();
   // data members
   vec3 v0, v1, v2;				// triangle vertices
+  vec3 P;				// triangle vertices
   vec3 N;							// triangle normal
 };

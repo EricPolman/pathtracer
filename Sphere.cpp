@@ -30,9 +30,16 @@ void Sphere::Intersect(Ray& _Ray)
     _Ray.intersection.position = _Ray.O + _Ray.D * t;
     _Ray.intersection.prim = this;
     _Ray.intersection.N = normalize(_Ray.intersection.position - P); 
-    if (invertNormal)
+    if (invertNormal) // Leaving object
+    {
       _Ray.intersection.N *= -1;
-    if (material) _Ray.intersection.color = material->color;
+      _Ray.lastRefractiveIndex = material->refractionIndex; 
+    }
+    else  // Entering object
+    {
+      _Ray.lastRefractiveIndex = 1.000277f; // Air
+    }
+    _Ray.intersection.color = material->color;
   }
 }
 
