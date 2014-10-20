@@ -91,7 +91,7 @@ void Scene::SetupHeavyScene()
 
         Triangle* tri = new Triangle(p0, p1, p2);
         tri->material->color = vec3(Random::value(), Random::value(), Random::value());
-        primList[primCount++] = tri;
+        //primList[primCount++] = tri;
         triangles.push_back(tri);
 
         if (Random::value() > 0.75f)
@@ -115,6 +115,7 @@ void Scene::Intersect(Ray& _Ray)
 {
   // intersect ray with each primitive in the scene
   for (int i = 0; i < primCount; i++) primList[i]->Intersect(_Ray);
+  bvhRoot->Intersect(_Ray);
 }
 
 void Scene::IntersectShadow(Ray& _Ray, float _Length)
@@ -123,6 +124,7 @@ void Scene::IntersectShadow(Ray& _Ray, float _Length)
   for (int i = 0; i < primCount; i++)
   {
     primList[i]->Intersect(_Ray);
+    bvhRoot->Intersect(_Ray);
     //if (_Ray.t <= _length)
     //  return;
   }

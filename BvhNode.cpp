@@ -31,6 +31,13 @@ void BvhNode::Draw2D()
     if (right)
       right->Draw2D();
   }
+  else
+  {
+    for (int i = 0; i < numObjects; ++i)
+    {
+      tris[i]->Draw2D();
+    }
+  }
 }
 
 
@@ -61,6 +68,21 @@ bool BvhNode::Intersect(Ray& _Ray)
 
   if (tmin < _Ray.t)
   {
+    if (isLeaf())
+    {
+      for (int i = 0; i < numObjects; ++i)
+      {
+        tris[i]->Intersect(_Ray);
+      }
+    }
+    else
+    {
+      if (left)
+        left->Intersect(_Ray);
+      if (right)
+        right->Intersect(_Ray);
+    }
+
     return true;
   }
   return false;
