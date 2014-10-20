@@ -11,9 +11,12 @@ public:
   void Intersect(Ray& _Ray);
   void Draw2D();
 
+  void SetUVs(vec2 _UV0, vec2 _UV1, vec2 _UV2);
+
   vec3 GetBarycentricCoordinate();
   // data members
   vec3 v0, v1, v2;				// triangle vertices
+  vec2 uv0, uv1, uv2;				// triangle uv coords
   vec3 P;				
   vec3 N;							// triangle normal
 };

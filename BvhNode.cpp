@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+std::queue<SplitInstruction> BvhNode::splitQueue;
+
 BvhNode::BvhNode(const vec3& b0, const vec3& b1)
 : bound0(b0), bound1(b1), numObjects(0), left(nullptr), right(nullptr)
 {
@@ -16,13 +18,9 @@ BvhNode::~BvhNode()
 {
 }
 
-
+static int inc = 0;
 void BvhNode::Draw2D()
 {
-  Renderer::Line2D(bound0.x, bound0.z, bound0.x, bound1.z, 0xff00ff);
-  Renderer::Line2D(bound0.x, bound0.z, bound1.x, bound0.z, 0xff00ff);
-  Renderer::Line2D(bound1.x, bound0.z, bound1.x, bound1.z, 0xff00ff);
-  Renderer::Line2D(bound1.x, bound1.z, bound0.x, bound1.z, 0xff00ff);
 
   if (!isLeaf())
   {
@@ -33,9 +31,15 @@ void BvhNode::Draw2D()
   }
   else
   {
+    Renderer::Line2D(bound0.x, bound0.z, bound0.x, bound1.z, 0xff00ff);
+    Renderer::Line2D(bound0.x, bound0.z, bound1.x, bound0.z, 0xff00ff);
+    Renderer::Line2D(bound1.x, bound0.z, bound1.x, bound1.z, 0xff00ff);
+    Renderer::Line2D(bound1.x, bound1.z, bound0.x, bound1.z, 0xff00ff);
+
     for (int i = 0; i < numObjects; ++i)
     {
       tris[i]->Draw2D();
+      //printf("%ith triangle drawn.", ++inc);
     }
   }
 }
@@ -104,22 +108,21 @@ void BvhNode::Build(Triangle** _Tris, int _Count)
     // Split this thing yo
     int p = Partition(_Tris, _Count);
 
-    // Get BV for left
-    if (p > 0)
+    if (p == _Count)
     {
-      AABB bvLeft = AABB::CreateFromTriangles(_Tris, p);
-
-      // Get BV for right
-      left = new BvhNode(bvLeft.boundMin, bvLeft.boundMax);
-
-      left->Build(_Tris, p);
+      // Is leaf
+      tris = _Tris;
+      numObjects = _Count;
     }
-    if (p < _Count)
+    else
     {
-      AABB bvRight = AABB::CreateFromTriangles(_Tris + p, _Count - p);
-      right = new BvhNode(bvRight.boundMin, bvRight.boundMax);
+      SplitInstruction instr;
+      instr.node = this;
+      instr.p = p;
+      instr.tris = _Tris;
+      instr.count = _Count;
 
-      right->Build(_Tris + p, _Count - p);
+      splitQueue.push(instr);
     }
   }
 }
@@ -143,10 +146,13 @@ int BvhNode::Partition(Triangle** triangles, int count)
   else
     spNormal = vec3(0, 0, 1);
 
-  std::vector<Triangle*> onTheLeft;
-  std::vector<Triangle*> onTheRight;
-  std::vector<Triangle*> inTheMiddle;
-  
+  static std::vector<Triangle*> onTheLeft;
+  static std::vector<Triangle*> onTheRight;
+  static std::vector<Triangle*> inTheMiddle;
+  onTheLeft.clear();
+  onTheRight.clear();
+  inTheMiddle.clear();
+
   for (int i = 0; i < count; ++i)
   {
     bool onLeft = false, onRight = false;
@@ -184,36 +190,4 @@ int BvhNode::Partition(Triangle** triangles, int count)
   }
 
   return onTheLeft.size() + inTheMiddle.size();
-}
-
-bool BvhNode::TriangleBoxIntersection(Triangle* _Tri)
-{
-  const Triangle& triangle = *_Tri;
-
-  /*// SAT for Triangle-AABB intersection, p.169 of Real-Time Collision Detection
-  static const vec3 axes[13] =
-  {
-    triangle.N,     // Triangle face normal
-    vec3(0, 0, 1),  // Z-axis normal
-    vec3(0, 1, 0),  // Y-axis normal
-    vec3(1, 0, 0),  // X-axis normal
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0),
-    vec3(0, 0, 0)
-  };*/
-
-  // First get AABB, then check if AABB overlaps BvhNode. Quick & dirty
-  AABB triBox = AABB::CreateFromTriangle(triangle);
-  // AABB-AABB intersection, p.79 of Real-Time Collision Detection
-  if (bound1.x < triBox.boundMin.x || bound0.x > triBox.boundMax.x) return false;
-  if (bound1.y < triBox.boundMin.y || bound0.y > triBox.boundMax.y) return false;
-  if (bound1.z < triBox.boundMin.z || bound0.z > triBox.boundMax.z) return false;
-
-  return true;
 }

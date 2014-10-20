@@ -6,6 +6,12 @@
 #include "BoxLight.h"
 #include "Triangle.h"
 #include "BvhNode.h"
+#include "Mesh.h"
+
+Mesh* mesh;
+auto path = "resources/sponza.obj";
+// Sponza from: http://hdri.cgtechniques.com/~sponza/files/
+// Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
 Scene::Scene()
 {
@@ -66,7 +72,25 @@ void Scene::SetupSphereScene()
 
 void Scene::SetupHeavyScene()
 {
-  primList[primCount++] = new Plane(vec3(0, 1, 0), -6);
+  primList[primCount++] = new Plane(vec3(0, 1, 0), -20);
+  primList[primCount++] = new Plane(vec3(-1, 0, 0), -20);
+  primList[primCount++] = new Plane(vec3(1, 0, 0), -20);
+  primList[primCount++] = new Plane(vec3(0, -1, 0), -20);
+  primList[primCount++] = new Plane(vec3(0, 0, -1), -20);
+  primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
+
+  primList[0]->material->type = Material::LIGHT;
+  primList[1]->material->type = Material::LIGHT;
+  primList[2]->material->type = Material::LIGHT;
+  primList[3]->material->type = Material::LIGHT;
+  primList[4]->material->type = Material::LIGHT;
+  primList[5]->material->type = Material::LIGHT;
+
+  //primList[primCount++] = new Plane(vec3(0, -1, 0), -10);
+  //primList[primCount++] = new Sphere(vec3(0, 0, 0), 2);
+  //primList[primCount - 1]->material->type = Material::LIGHT;
+
+  /*primList[primCount++] = new Plane(vec3(0, 1, 0), -6);
   primList[primCount++] = new Plane(vec3(-1, 0, 0), -6);
   primList[primCount++] = new Plane(vec3(1, 0, 0), -6);
   primList[primCount++] = new Plane(vec3(0, -1, 0), -6);
@@ -77,8 +101,9 @@ void Scene::SetupHeavyScene()
   primList[1]->material->color = vec3(0.1f, 1, 0.1f);
   primList[2]->material->color = vec3(1, 0.1f, 0.1f);
   primList[1]->material->type = Material::LIGHT;
-  primList[2]->material->type = Material::LIGHT;
+  primList[2]->material->type = Material::LIGHT;*/
 
+  /*
   for (int x = 0; x < 5; ++x)
   {
     for (int y = 0; y < 5; ++y)
@@ -102,13 +127,58 @@ void Scene::SetupHeavyScene()
       }
     }
   }
+  */
+  printf("Parsing mesh.\n");
+  mesh = new Mesh(path);
+  for (auto i : mesh->m_triangles)
+  {
+    triangles.push_back(i);
+    //if (Random::value() > 0.8f)
+    //i->material->color = vec3(Random::value(), Random::value(), Random::value());
+    i->material->type = Material::PHONG;
+  }
+  printf("Done parsing mesh.\n");
 }
 
 void Scene::BuildBVH()
 {
+  printf("Generating BV for entire mesh.\n");
   AABB bv = AABB::CreateFromTriangles(&triangles[0], triangles.size());
+  printf("Done generating BV.\n");
   bvhRoot = new BvhNode(bv.boundMin, bv.boundMax);
+  printf("Building root node.\n");
   bvhRoot->Build(&triangles[0], triangles.size());
+
+  printf("Going through splitQueue.\n");
+  while (BvhNode::splitQueue.size() > 0)
+  {
+    SplitInstruction instr = BvhNode::splitQueue.front();
+    BvhNode::splitQueue.pop();
+
+    printf("%i\t%i\t%p\n", instr.count, instr.p, instr.node);
+
+    //if (instr.p == instr.count)
+    //  continue;
+
+    // Get BV for left
+    if (instr.p > 0)
+    {
+      AABB bvLeft = AABB::CreateFromTriangles(instr.tris, instr.p);
+
+      // Get BV for right
+      instr.node->left = new BvhNode(bvLeft.boundMin, bvLeft.boundMax);
+
+      instr.node->left->Build(instr.tris, instr.p);
+    }
+    if (instr.p < instr.count)
+    {
+      AABB bvRight = AABB::CreateFromTriangles(instr.tris + instr.p, instr.count - instr.p);
+      instr.node->right = new BvhNode(bvRight.boundMin, bvRight.boundMax);
+
+      instr.node->right->Build(instr.tris + instr.p, instr.count - instr.p);
+    }
+  }
+  printf("BVH done.\n");
 }
 
 void Scene::Intersect(Ray& _Ray)

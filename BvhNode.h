@@ -1,11 +1,15 @@
 #pragma once
 #include "glm/glm.hpp"
 #include <vector>
+#include <queue>
 
 class Ray;
 class Triangle;
+class BvhNode;
 
 using namespace glm;
+
+struct SplitInstruction { BvhNode* node; Triangle** tris; int p; int count; };
 
 class BvhNode
 {
@@ -29,7 +33,6 @@ public:
 
   void Build(Triangle** triangles, int count);
   int Partition(Triangle** triangles, int count);
-  void Split();
-
-  bool TriangleBoxIntersection(Triangle*);
+  
+  static std::queue<SplitInstruction> splitQueue;
 };

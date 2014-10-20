@@ -4,10 +4,10 @@
 //    ----------------
 
 // visible world space definition
-#define WXMIN	-8.0f	// left edge of visible world
-#define WYMIN	-8.0f // top edge of visible world
-#define WXMAX	 8.0f // right edge of visible world
-#define WYMAX	 8.0f // bottom edge of visible world
+#define WXMIN	-25.0f	// left edge of visible world
+#define WYMIN	-25.0f // top edge of visible world
+#define WXMAX	 25.0f // right edge of visible world
+#define WYMAX	 25.0f // bottom edge of visible world
 
 // world space to screen space conversion
 #define SX(x) ((((x)-(WXMIN))/((WXMAX)-(WXMIN)))*(SCRWIDTH/2)+SCRWIDTH/2)
@@ -36,7 +36,7 @@
 
 #define ROULETTE_FACTOR 30.0f
 
-#define MIN_OBJECTS_IN_BVH_NODE 5
+#define MIN_OBJECTS_IN_BVH_NODE 10
 
 #define MAX_BRIGHTNESS 16.0f
 

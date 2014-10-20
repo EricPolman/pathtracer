@@ -73,6 +73,7 @@ void Scene::Draw2D()
   sprintf(t, "%4.1f", WYMIN);
   screen->Print(t, (int)SX(0) + 2, SCRHEIGHT - 8, 0x006600);
   for (int i = 0; i < primCount; i++) primList[i]->Draw2D();
+  bvhRoot->Draw2D();
 }
 
 
@@ -80,7 +81,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, -1.5f, -7), vec3(0, 0, 1));
+  camera.Set(vec3(-5, -1, 0), vec3(0, 0, 1));
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
@@ -172,37 +173,44 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
   }
 }
 
+int currentY = 0;
 void Renderer::Render( )
 {
   // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
-  int midY = SCRHEIGHT / 2;
-  Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
-  Trace(midRay);
-  camera.focusDistance = midRay.t;
-
-
-  for (int x = 0; x < (SCRWIDTH / 2); x++)
+  if (currentY == 0)
   {
-    if (((x % 32) == 0))
+    int midY = SCRHEIGHT / 2;
+    Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
+    Trace(midRay);
+    camera.focusDistance = midRay.t;
+
+
+    for (int x = 0; x < (SCRWIDTH / 2); x++)
     {
-      Ray ray = camera.GenerateRay(x, midY);
-      TracePath(ray, 0, 0xFFFFFF);
+      if (((x % 32) == 0))
+      {
+        Ray ray = camera.GenerateRay(x, midY);
+        TracePath(ray, 0, 0xFFFFFF);
+      }
     }
   }
 
-  const static int THREADS = 4;
+  const static int THREADS = 8;
   std::thread threads[THREADS];
 
   for (int t = 0; t < THREADS; ++t)
   {
-    threads[t] = std::thread(&Renderer::RenderLinePathTraced, SCRHEIGHT / THREADS * t, screen->GetBuffer(), this, SCRHEIGHT / THREADS);
+    threads[t] = std::thread(&Renderer::RenderLinePathTraced, SCRHEIGHT / THREADS * t + currentY, screen->GetBuffer(), this, 1);
   }
   for (int t = 0; t < THREADS; t++)
   {
     threads[t].join();
   }
-
-  scene.bvhRoot->Draw2D();
+  
+  if (currentY++ == SCRHEIGHT / THREADS - 1)
+  {
+    currentY = 0;
+  }
 }
 
 // EOF

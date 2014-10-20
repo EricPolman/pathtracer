@@ -46,8 +46,8 @@ void Triangle::Intersect(Ray& _Ray)
   if (t < _Ray.t)
   {
     _Ray.t = t;
-    _Ray.u = u;
-    _Ray.v = v;
+    _Ray.u = u + uv0.x;
+    _Ray.v = v + uv0.y;
     _Ray.intersection.position = _Ray.O + _Ray.D * t;
     _Ray.intersection.prim = this;
     _Ray.intersection.N = N;
@@ -71,4 +71,12 @@ vec3 Triangle::GetBarycentricCoordinate()
   //assert(false);
 
   return vec3();
+}
+
+
+void Triangle::SetUVs(vec2 _UV0, vec2 _UV1, vec2 _UV2)
+{
+  uv0 = _UV0;
+  uv1 = _UV1;
+  uv2 = _UV2;
 }

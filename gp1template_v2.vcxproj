@@ -108,7 +108,7 @@
       <AdditionalLibraryDirectories>lib\SDL2-2.0.3\lib\x86;lib\OpenGL;lib\freeimage</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>
@@ -126,6 +126,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Primitive.cpp" />
     <ClCompile Include="Ray.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Primitive.h" />
     <ClInclude Include="Random.h" />

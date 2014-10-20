@@ -23,30 +23,31 @@ int currentLine = 0;
 
 vec2 oldMousePos;
 
+vec3 startViewDir;
+
 // == Game::Init ==============================================================
 void Game::Init()
 {
 	// initialization code goes here
   printf("%i\n", sizeof(BvhNode));
+  startViewDir = renderer.camera.V;
+  Draw2DView();
 }
 
 // == Game::Draw2DView ========================================================
 void Game::Draw2DView()
 {
+  screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
 	renderer.scene.Draw2D();
-	renderer.camera.Draw2D();
+  renderer.camera.Draw2D();
+  screen->ClipTo(0, 0, float(SCRWIDTH / 2), float(SCRHEIGHT));
 }
 
 // == Game::Init ==============================================================
 void Game::Tick( float dt )
 {
-	screen->Clear( 0 );					// first line; clear screen..
-  screen->ClipTo(0, 0, float(SCRWIDTH / 2), float(SCRHEIGHT));
+	//screen->Clear( 0 );					// first line; clear screen..
   renderer.Render();
-  screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
-  renderer.scene.Draw2D();
-  renderer.camera.Draw2D();
-
 
   vec2 mousePosition = Input->GetMousePosition();
   vec2 mouseMovement = mousePosition - oldMousePos;
@@ -88,7 +89,7 @@ void Game::Tick( float dt )
   
   if (Input->IsMouseButtonDown(SDL_BUTTON_RIGHT))
   {
-    renderer.camera.rotation *= glm::angleAxis(dt * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(dt * mouseMovement.y * 4000, vec3(-1, 0, 0));
+    renderer.camera.rotation *= glm::angleAxis(0.02f * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(0.02f * mouseMovement.y * 4000, vec3(-1, 0, 0));
     movement = true;
   }
 
@@ -104,9 +105,9 @@ void Game::Tick( float dt )
     memset(&renderer.firstRenders[0], 0, sizeof(renderer.firstRenders));
     memset(renderer.frameCounter[0], 0, sizeof(renderer.frameCounter));
     memset(renderer.accumulatedColours[0], 0, sizeof(renderer.accumulatedColours));
+    renderer.camera.Set(renderer.camera.eyePos, renderer.camera.rotation * vec3(0,0,1));
   }
 
-  renderer.camera.Set(renderer.camera.eyePos, renderer.camera.rotation * vec3(0,0,1));
   oldMousePos = Input->GetMousePosition();
 }
 
