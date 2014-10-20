@@ -121,6 +121,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BoxLight.cpp" />
+    <ClCompile Include="BvhNode.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -137,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoxLight.h" />
+    <ClInclude Include="BvhNode.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="game.h" />

@@ -47,7 +47,7 @@ vec3 IlluminateLambertPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Mate
 
   Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
 
-  vec3 color = _Renderer.TracePath(newRay, _Depth + 1, 0) * rndVecDotN * _Material.color;
+  vec3 color = _Renderer.TracePath(newRay, _Depth + 1, 0) * _Material.color;
   return color;
 }
 
@@ -134,17 +134,17 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
   vec3 reflectionVector = normalize(reflect(_Ray.D, _Ray.intersection.N));
   vec3 rndVec = CosWeightedRandomHemisphereDirection2(reflectionVector);
   float rndVecDotN = dot(rndVec, _Ray.intersection.N);
-  if (rndVecDotN < 0)
+  while (rndVecDotN < 0)
   {
-    rndVec = -rndVec;
-    rndVecDotN *= -1;
+    vec3 rndVec = CosWeightedRandomHemisphereDirection2(reflectionVector);
+    rndVecDotN = dot(rndVec, _Ray.intersection.N);
   }
   
   Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, rndVec);
 
   vec3 color = _Renderer.TracePath(recursiveRay, _Depth + 1, 0);
   
-  float spec = powf(rndVecDotN, 50) + rndVecDotN;
+  float spec = powf(rndVecDotN, 20);
 
   return color * _Material.color * spec;
 }
@@ -217,7 +217,7 @@ vec3 IlluminateDielectric(Renderer& _Renderer, Ray& _Ray, Material& _Material, i
 
     vec3 col;
     if (_Debug)
-    {
+    {	
       col = _Renderer.Trace(recursiveRay, _Depth + 1, 0xFF);
     }
     else

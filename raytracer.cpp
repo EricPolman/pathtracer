@@ -13,6 +13,7 @@ using namespace glm;
 #include "Random.h"
 #include <thread>
 #include <functional>
+#include "BvhNode.h"
 
 extern Surface* screen; // defined in template.cpp
 
@@ -155,6 +156,10 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
 
       // visualize intersection result
       //_Screen->Plot(x, y, ConvertColor(color));
+      if (glm::length(color) > MAX_BRIGHTNESS)
+      {
+        color = normalize(color) * MAX_BRIGHTNESS;
+      }
 
       _Renderer->accumulatedColours[y][x] += color;
       _Renderer->frameCounter[y][x] += 1;
@@ -174,6 +179,7 @@ void Renderer::Render( )
   Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
   Trace(midRay);
   camera.focusDistance = midRay.t;
+
 
   for (int x = 0; x < (SCRWIDTH / 2); x++)
   {
@@ -195,6 +201,8 @@ void Renderer::Render( )
   {
     threads[t].join();
   }
+
+  scene.bvhRoot->Draw2D();
 }
 
 // EOF

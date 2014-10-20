@@ -9,6 +9,7 @@
 #include "template.h"
 #include "definitions.h"
 #include "InputManager.h"
+#include "BvhNode.h"
 
 using namespace Tmpl8;
 using namespace glm;
@@ -26,6 +27,7 @@ vec2 oldMousePos;
 void Game::Init()
 {
 	// initialization code goes here
+  printf("%i\n", sizeof(BvhNode));
 }
 
 // == Game::Draw2DView ========================================================

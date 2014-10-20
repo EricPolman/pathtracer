@@ -10,8 +10,10 @@ public:
   // methods
   void Intersect(Ray& _Ray);
   void Draw2D();
+
+  vec3 GetBarycentricCoordinate();
   // data members
   vec3 v0, v1, v2;				// triangle vertices
-  vec3 P;				// triangle vertices
+  vec3 P;				
   vec3 N;							// triangle normal
 };

@@ -4,19 +4,17 @@
 //    ----------------
 
 // visible world space definition
-#define WXMIN	-6.0f	// left edge of visible world
-#define WYMIN	-6.0f // top edge of visible world
-#define WXMAX	 6.0f // right edge of visible world
-#define WYMAX	 6.0f // bottom edge of visible world
+#define WXMIN	-8.0f	// left edge of visible world
+#define WYMIN	-8.0f // top edge of visible world
+#define WXMAX	 8.0f // right edge of visible world
+#define WYMAX	 8.0f // bottom edge of visible world
 
 // world space to screen space conversion
 #define SX(x) ((((x)-(WXMIN))/((WXMAX)-(WXMIN)))*(SCRWIDTH/2)+SCRWIDTH/2)
 #define SY(y) ((((-y)-(WYMIN))/((WYMAX)-(WYMIN)))*SCRHEIGHT) // trust me
 
-
 #define SCRWIDTH	1024
 #define SCRHEIGHT	512
-
 
 #define MIN(a,b) (((a)>(b))?(b):(a))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -30,15 +28,16 @@
 #define broadcastps(ps)		_mm_shuffle_ps((ps),(ps), 0)
 #define broadcastss(ss)		broadcastps(loadss((ss)))
 
-
 #define MALLOC64(x) _aligned_malloc(x,64)
 #define FREE64(x) _aligned_free(x)
-
 
 #define EPSILON		0.0001f
 #define MAX_TRACE_DEPTH 3
 
-
 #define ROULETTE_FACTOR 30.0f
+
+#define MIN_OBJECTS_IN_BVH_NODE 5
+
+#define MAX_BRIGHTNESS 16.0f
 
 typedef unsigned long Pixel;
