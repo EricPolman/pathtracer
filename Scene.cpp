@@ -9,7 +9,7 @@
 #include "Mesh.h"
 
 Mesh* mesh;
-auto path = "resources/sponza.obj";
+auto path = "resources/sponzahalf.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
@@ -86,6 +86,21 @@ void Scene::SetupHeavyScene()
   primList[4]->material->type = Material::LIGHT;
   primList[5]->material->type = Material::LIGHT;
 
+  primList[primCount++] = new Sphere(vec3(8, 0, 5), 1.5f);
+  primList[primCount++] = new Sphere(vec3(8, 0, -5), 1.5f);
+  primList[6]->material->type = Material::LIGHT;
+  primList[7]->material->type = Material::LIGHT;
+  primList[6]->material->color = vec3(1.0f, 0.1f, 0.1f);
+  primList[7]->material->color = vec3(0.1f, 1.0f, 0.1f);
+
+  primList[primCount++] = new Sphere(vec3(5, 0, 5), 1.5f);
+  primList[primCount++] = new Sphere(vec3(5, 0, -5), 1.5f);
+  primList[8]->material->type = Material::LIGHT;
+  primList[9]->material->type = Material::LIGHT;
+  primList[8]->material->color = vec3(0.1f, 1.0f, 0.1f);
+  primList[9]->material->color = vec3(1.0f, 0.1f, 0.1f);
+
+
   //primList[primCount++] = new Plane(vec3(0, -1, 0), -10);
   //primList[primCount++] = new Sphere(vec3(0, 0, 0), 2);
   //primList[primCount - 1]->material->type = Material::LIGHT;
@@ -133,9 +148,9 @@ void Scene::SetupHeavyScene()
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);
+    //i->material->color = vec3(0.9f, 0.9f, 0.8f);
     //if (Random::value() > 0.8f)
-    //i->material->color = vec3(Random::value(), Random::value(), Random::value());
-    i->material->type = Material::PHONG;
+      //i->material->type = Material::PHONG;
   }
   printf("Done parsing mesh.\n");
 }

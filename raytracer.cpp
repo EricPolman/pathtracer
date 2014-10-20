@@ -81,7 +81,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(-5, -1, 0), vec3(0, 0, 1));
+  camera.Set(vec3(-5, 2.371f, EPSILON), vec3(1, 0, 0));
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
@@ -176,12 +176,16 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
 int currentY = 0;
 void Renderer::Render( )
 {
+  if (currentY > SCRHEIGHT - 1)
+  {
+    currentY = 0;
+  }
   // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
   if (currentY == 0)
   {
     int midY = SCRHEIGHT / 2;
     Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
-    Trace(midRay);
+    TracePath(midRay);
     camera.focusDistance = midRay.t;
 
 
@@ -195,22 +199,19 @@ void Renderer::Render( )
     }
   }
 
-  const static int THREADS = 8;
+  const static int THREADS = 4;
   std::thread threads[THREADS];
 
   for (int t = 0; t < THREADS; ++t)
   {
-    threads[t] = std::thread(&Renderer::RenderLinePathTraced, SCRHEIGHT / THREADS * t + currentY, screen->GetBuffer(), this, 1);
+    threads[t] = std::thread(&Renderer::RenderLinePathTraced, currentY + t, screen->GetBuffer(), this, 1);
   }
   for (int t = 0; t < THREADS; t++)
   {
     threads[t].join();
   }
   
-  if (currentY++ == SCRHEIGHT / THREADS - 1)
-  {
-    currentY = 0;
-  }
+  currentY += THREADS;
 }
 
 // EOF
