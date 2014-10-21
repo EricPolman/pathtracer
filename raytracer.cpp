@@ -81,7 +81,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(-5, 2.371f, EPSILON), vec3(1, 0, 0));
+  camera.Set(vec3(0, 0, -8), vec3(0, 0, 1));
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
@@ -111,7 +111,7 @@ vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
   }
   return color;
 }
-vec3 Renderer::TracePath(Ray& _Ray, int depth, unsigned int _Debug)
+vec3 Renderer::TracePath(Ray& _Ray, float _CurrentProbability, unsigned int _Debug)
 {
   // intersect a single ray with the objects in the scene
   scene.Intersect(_Ray);
@@ -125,10 +125,10 @@ vec3 Renderer::TracePath(Ray& _Ray, int depth, unsigned int _Debug)
   //if (depth > MAX_TRACE_DEPTH)
   //  return _Ray.intersection.color;
   vec3 color;
-  float probability = Random::value();
-  if (probability < (1.0f - depth / ROULETTE_FACTOR)) // Kill chance
+  float roulette = Random::value();
+  if (roulette < ROULETTE_SURVIVAL_CHANCE) // Kill chance
   {
-    color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, depth, true, _Debug) / (1.0f - depth / ROULETTE_FACTOR);
+    color = _Ray.intersection.prim->material->Illuminate(*this, _Ray, 0, true, _Debug) / ROULETTE_SURVIVAL_CHANCE;
   }
 
   if (_Debug)
@@ -176,26 +176,19 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
 int currentY = 0;
 void Renderer::Render( )
 {
-  if (currentY > SCRHEIGHT - 1)
-  {
-    currentY = 0;
-  }
   // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
-  if (currentY == 0)
+  int midY = SCRHEIGHT / 2;
+  Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
+  TracePath(midRay, 1.0f);
+  camera.focusDistance = midRay.t;
+
+
+  for (int x = 0; x < (SCRWIDTH / 2); x++)
   {
-    int midY = SCRHEIGHT / 2;
-    Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
-    TracePath(midRay);
-    camera.focusDistance = midRay.t;
-
-
-    for (int x = 0; x < (SCRWIDTH / 2); x++)
+    if (((x % 32) == 0))
     {
-      if (((x % 32) == 0))
-      {
-        Ray ray = camera.GenerateRay(x, midY);
-        TracePath(ray, 0, 0xFFFFFF);
-      }
+      Ray ray = camera.GenerateRay(x, midY);
+      TracePath(ray, 0, 0xFFFFFF);
     }
   }
 
@@ -204,14 +197,12 @@ void Renderer::Render( )
 
   for (int t = 0; t < THREADS; ++t)
   {
-    threads[t] = std::thread(&Renderer::RenderLinePathTraced, currentY + t, screen->GetBuffer(), this, 1);
+    threads[t] = std::thread(&Renderer::RenderLinePathTraced, t * SCRHEIGHT / THREADS, screen->GetBuffer(), this, SCRHEIGHT / THREADS);
   }
   for (int t = 0; t < THREADS; t++)
   {
     threads[t].join();
   }
-  
-  currentY += THREADS;
 }
 
 // EOF

@@ -31,7 +31,6 @@ void Game::Init()
 	// initialization code goes here
   printf("%i\n", sizeof(BvhNode));
   startViewDir = renderer.camera.V;
-  Draw2DView();
 }
 
 // == Game::Draw2DView ========================================================
@@ -46,7 +45,8 @@ void Game::Draw2DView()
 // == Game::Init ==============================================================
 void Game::Tick( float dt )
 {
-	//screen->Clear( 0 );					// first line; clear screen..
+	screen->Clear( 0 );					// first line; clear screen..
+  Draw2DView();
   renderer.Render();
 
   vec2 mousePosition = Input->GetMousePosition();
@@ -78,18 +78,18 @@ void Game::Tick( float dt )
   }
   if (Input->IsKeyDown(SDLK_KP_4))
   {
-    renderer.camera.eyePos.y -= dt;
+    renderer.camera.eyePos.y += dt;
     movement = true;
   }
   if (Input->IsKeyDown(SDLK_KP_1))
   {
-    renderer.camera.eyePos.y += dt;
+    renderer.camera.eyePos.y -= dt;
     movement = true;
   }
   
   if (Input->IsMouseButtonDown(SDL_BUTTON_RIGHT))
   {
-    renderer.camera.rotation *= glm::angleAxis(0.02f * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(0.02f * mouseMovement.y * 4000, vec3(-1, 0, 0));
+    renderer.camera.rotation *= glm::angleAxis(0.02f * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(0.02f * mouseMovement.y * 4000, vec3(1, 0, 0));
     movement = true;
   }
 

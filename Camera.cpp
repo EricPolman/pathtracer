@@ -32,11 +32,11 @@ void Camera::Set(vec3 _Pos, vec3 _Direction)
 Ray Camera::GenerateRay(int _X, int _Y)
 {
   // calculate position on virtual screen plane floating in front of camera
-  float fx = ((float)_X/* + Random::value()*/) / (SCRWIDTH / 2), fy = ((float)_Y/* + Random::value()*/) / SCRHEIGHT;
+  float fx = ((float)_X + Random::value()) / (SCRWIDTH / 2), fy = ((float)_Y + Random::value()) / SCRHEIGHT;
   vec3 P = p1 + (p2 - p1) * fx + (p4 - p1) * fy;
   // generate a ray starting at the camera, going through a pixel
   Ray ray;
-  ray.O = eyePos;// +right * (Random::value() - 0.5f) * (1.0f / 4.0f) + up * (Random::value() - 0.5f)* (1.0f / 4.0f);
+  ray.O = eyePos + right * (Random::value() - 0.5f) * (1.0f / 4.0f) + up * (Random::value() - 0.5f)* (1.0f / 4.0f);
   ray.D = normalize(P - ray.O);
   ray.t = 1e34;
   return ray;

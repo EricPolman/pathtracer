@@ -9,7 +9,7 @@
 #include "Mesh.h"
 
 Mesh* mesh;
-auto path = "resources/sponzahalf.obj";
+auto path = "resources/mace.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
@@ -72,21 +72,26 @@ void Scene::SetupSphereScene()
 
 void Scene::SetupHeavyScene()
 {
-  primList[primCount++] = new Plane(vec3(0, 1, 0), -20);
+  primList[primCount++] = new Plane(vec3(0, -1, 0), -20);
   primList[primCount++] = new Plane(vec3(-1, 0, 0), -20);
   primList[primCount++] = new Plane(vec3(1, 0, 0), -20);
-  primList[primCount++] = new Plane(vec3(0, -1, 0), -20);
+  primList[primCount++] = new Plane(vec3(0, 1, 0), -20);
   primList[primCount++] = new Plane(vec3(0, 0, -1), -20);
   primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
 
   primList[0]->material->type = Material::LIGHT;
-  primList[1]->material->type = Material::LIGHT;
-  primList[2]->material->type = Material::LIGHT;
-  primList[3]->material->type = Material::LIGHT;
-  primList[4]->material->type = Material::LIGHT;
-  primList[5]->material->type = Material::LIGHT;
+  //primList[1]->material->type = Material::LIGHT;
+  //primList[2]->material->type = Material::LIGHT;
+  primList[1]->material->color = vec3(1, 0, 0);
+  primList[2]->material->color = vec3(0, 1, 0);
+  primList[3]->material->color = vec3(0.5f, 0.5f, 0.5f);
+  primList[4]->material->color = vec3(0.5f, 0.5f, 0.5f);
+  primList[5]->material->color = vec3(0.5f, 0.5f, 0.5f);
+  //primList[3]->material->type = Material::LIGHT;
+  //primList[4]->material->type = Material::LIGHT;
+  //primList[5]->material->type = Material::LIGHT;
 
-  primList[primCount++] = new Sphere(vec3(8, 0, 5), 1.5f);
+  /*primList[primCount++] = new Sphere(vec3(8, 0, 5), 1.5f);
   primList[primCount++] = new Sphere(vec3(8, 0, -5), 1.5f);
   primList[6]->material->type = Material::LIGHT;
   primList[7]->material->type = Material::LIGHT;
@@ -98,7 +103,7 @@ void Scene::SetupHeavyScene()
   primList[8]->material->type = Material::LIGHT;
   primList[9]->material->type = Material::LIGHT;
   primList[8]->material->color = vec3(0.1f, 1.0f, 0.1f);
-  primList[9]->material->color = vec3(1.0f, 0.1f, 0.1f);
+  primList[9]->material->color = vec3(1.0f, 0.1f, 0.1f);*/
 
 
   //primList[primCount++] = new Plane(vec3(0, -1, 0), -10);
