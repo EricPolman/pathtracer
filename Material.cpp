@@ -78,7 +78,11 @@ vec3 IlluminateLambertPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Mate
 
   Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
 
-  vec3 color = _Renderer.TracePath(newRay, 0.0f, 0) * _Material.color;
+  vec3 color;
+  if (_Material.texture)
+    color = _Renderer.TracePath(newRay, 0.0f, 0) * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+  else
+    color = _Renderer.TracePath(newRay, 0.0f, 0) * _Material.color;
   return color;
 }
 
@@ -303,7 +307,6 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
   }
 
   const float tOverI = n1 / n2;
-  const float iOverT = n1 / n2;
 
   const vec3& N = _Ray.intersection.N;
   const float cosI = -glm::dot(N, _Ray.D); // cosine of incidence ray
@@ -325,11 +328,15 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
 
       Ray recursiveRay;
       recursiveRay.D = T;
+      /*if (leaving)
+        recursiveRay.lastRefractiveIndex = 1.000277f;
+      else
+        recursiveRay.lastRefractiveIndex = _Material.refractionIndex;*/
 
       recursiveRay.O = _Ray.intersection.position + T * EPSILON;
 
-      vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug);
-
+      vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug & 0xFF0000);
+      //recursiveRay.Draw2D();
       if (leaving) // Absorp according to Beer's law
       {
         vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f

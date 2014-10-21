@@ -7,9 +7,11 @@
 #include "Triangle.h"
 #include "BvhNode.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 Mesh* mesh;
-auto path = "resources/mace.obj";
+Texture* texture;
+auto path = "resources/box_rot.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
@@ -80,83 +82,30 @@ void Scene::SetupHeavyScene()
   primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
 
   primList[0]->material->type = Material::LIGHT;
-  //primList[1]->material->type = Material::LIGHT;
-  //primList[2]->material->type = Material::LIGHT;
-  primList[1]->material->color = vec3(1, 0, 0);
-  primList[2]->material->color = vec3(0, 1, 0);
+  //primList[1]->material->color = vec3(1, 0, 0);
+  //primList[2]->material->color = vec3(0, 1, 0);
   primList[3]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[4]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[5]->material->color = vec3(0.5f, 0.5f, 0.5f);
-  //primList[3]->material->type = Material::LIGHT;
-  //primList[4]->material->type = Material::LIGHT;
-  //primList[5]->material->type = Material::LIGHT;
 
-  /*primList[primCount++] = new Sphere(vec3(8, 0, 5), 1.5f);
-  primList[primCount++] = new Sphere(vec3(8, 0, -5), 1.5f);
-  primList[6]->material->type = Material::LIGHT;
-  primList[7]->material->type = Material::LIGHT;
-  primList[6]->material->color = vec3(1.0f, 0.1f, 0.1f);
-  primList[7]->material->color = vec3(0.1f, 1.0f, 0.1f);
+  //primList[primCount++] = new Sphere(vec3(0, 0, -6), 2);
+  //primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  //primList[primCount - 1]->material->refractionIndex = 1.4f;
 
-  primList[primCount++] = new Sphere(vec3(5, 0, 5), 1.5f);
-  primList[primCount++] = new Sphere(vec3(5, 0, -5), 1.5f);
-  primList[8]->material->type = Material::LIGHT;
-  primList[9]->material->type = Material::LIGHT;
-  primList[8]->material->color = vec3(0.1f, 1.0f, 0.1f);
-  primList[9]->material->color = vec3(1.0f, 0.1f, 0.1f);*/
+  printf("Loading texture.\n");
+  texture = new Texture();
+  texture->Load("resources/box_texture.png");
+  printf("Done loading texture.\n");
 
-
-  //primList[primCount++] = new Plane(vec3(0, -1, 0), -10);
-  //primList[primCount++] = new Sphere(vec3(0, 0, 0), 2);
-  //primList[primCount - 1]->material->type = Material::LIGHT;
-
-  /*primList[primCount++] = new Plane(vec3(0, 1, 0), -6);
-  primList[primCount++] = new Plane(vec3(-1, 0, 0), -6);
-  primList[primCount++] = new Plane(vec3(1, 0, 0), -6);
-  primList[primCount++] = new Plane(vec3(0, -1, 0), -6);
-  primList[primCount++] = new Plane(vec3(0, 0, -1), -6);
-  primList[primCount++] = new Plane(vec3(0, 0, 1), -7.5f);
-
-  primList[0]->material->type = Material::LIGHT;
-  primList[1]->material->color = vec3(0.1f, 1, 0.1f);
-  primList[2]->material->color = vec3(1, 0.1f, 0.1f);
-  primList[1]->material->type = Material::LIGHT;
-  primList[2]->material->type = Material::LIGHT;*/
-
-  /*
-  for (int x = 0; x < 5; ++x)
-  {
-    for (int y = 0; y < 5; ++y)
-    {
-      for (int z = 0; z < 5; ++z)
-      {
-        vec3 p0(-5 + 2.5f * x - 0.5f, -5 + 2.5f * y - 0.5f, -5 + 2.5f * z);
-        vec3 p1(-5 + 2.5f * x, -5 + 2.5f * y + 0.5f, -5 + 2.5f * z + 0.5f);
-        vec3 p2(-5 + 2.5f * x + 0.5f, -5 + 2.5f * y - 0.5f, -5 + 2.5f * z);
-
-        Triangle* tri = new Triangle(p0, p1, p2);
-        tri->material->color = vec3(Random::value(), Random::value(), Random::value());
-        //primList[primCount++] = tri;
-        triangles.push_back(tri);
-
-        if (Random::value() > 0.75f)
-        {
-          tri->material->type = Material::LIGHT;
-          tri->material->color *= 2;
-        }
-      }
-    }
-  }
-  */
   printf("Parsing mesh.\n");
   mesh = new Mesh(path);
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);
+    i->material->texture = texture;
     //i->material->color = vec3(0.9f, 0.9f, 0.8f);
     //if (Random::value() > 0.8f)
-    i->material->type = Material::PHONG;
-    i->material->specularComponent = 20;
+    //i->material->type = Material::PHONG;
   }
   printf("Done parsing mesh.\n");
 }

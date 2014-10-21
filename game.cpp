@@ -1,6 +1,7 @@
 // Template for GP1, version 2
 // IGAD/NHTV - Jacco Bikker - 2006-2014
 
+#include "InputManager.h"
 #include "Random.h"
 #include "string.h"
 #include "game.h"
@@ -8,7 +9,6 @@
 #include "stdlib.h"
 #include "template.h"
 #include "definitions.h"
-#include "InputManager.h"
 #include "BvhNode.h"
 
 using namespace Tmpl8;
@@ -105,8 +105,9 @@ void Game::Tick( float dt )
     memset(&renderer.firstRenders[0], 0, sizeof(renderer.firstRenders));
     memset(renderer.frameCounter[0], 0, sizeof(renderer.frameCounter));
     memset(renderer.accumulatedColours[0], 0, sizeof(renderer.accumulatedColours));
-    renderer.camera.Set(renderer.camera.eyePos, renderer.camera.rotation * vec3(0,0,1));
   }
+
+  renderer.camera.Set(renderer.camera.eyePos, renderer.camera.rotation * vec3(0, 0, 1));
 
   oldMousePos = Input->GetMousePosition();
 }

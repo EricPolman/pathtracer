@@ -21,10 +21,10 @@ BvhNode::~BvhNode()
 static int inc = 0;
 void BvhNode::Draw2D()
 {
-  Renderer::Line2D(bound0.x, bound0.z, bound0.x, bound1.z, 0xff00ff);
-  Renderer::Line2D(bound0.x, bound0.z, bound1.x, bound0.z, 0xff00ff);
-  Renderer::Line2D(bound1.x, bound0.z, bound1.x, bound1.z, 0xff00ff);
-  Renderer::Line2D(bound1.x, bound1.z, bound0.x, bound1.z, 0xff00ff);
+  //Renderer::Line2D(bound0.x, bound0.z, bound0.x, bound1.z, 0xff00ff);
+  //Renderer::Line2D(bound0.x, bound0.z, bound1.x, bound0.z, 0xff00ff);
+  //Renderer::Line2D(bound1.x, bound0.z, bound1.x, bound1.z, 0xff00ff);
+  //Renderer::Line2D(bound1.x, bound1.z, bound0.x, bound1.z, 0xff00ff);
 
   if (!isLeaf())
   {

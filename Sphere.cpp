@@ -39,6 +39,7 @@ void Sphere::Intersect(Ray& _Ray)
     {
       _Ray.lastRefractiveIndex = 1.000277f; // Air
     }
+    //_Ray.lastRefractiveIndex = material->refractionIndex;
     _Ray.intersection.color = material->color;
   }
 }

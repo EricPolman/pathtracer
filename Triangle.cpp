@@ -17,6 +17,7 @@ void Triangle::Intersect(Ray& _Ray)
   // http://www.cs.virginia.edu/~gfx/Courses/2003/ImageSynthesis/papers/Acceleration/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
   vec3 e1 = v1 - v0;       // first edge
   vec3 e2 = v2 - v0;       // second edge
+
   vec3 tvec, pvec, qvec;
   float det;
 
@@ -43,16 +44,23 @@ void Triangle::Intersect(Ray& _Ray)
 
   float t = dot(e2, qvec) * invDet;
 
-  if (t < _Ray.t)
+  if (t < _Ray.t && t > 0)
   {
-    _Ray.t = t;
-    _Ray.u = u + uv0.x;
-    _Ray.v = v + uv0.y;
     _Ray.intersection.position = _Ray.O + _Ray.D * t;
+    _Ray.t = t;
+
+    const vec2 uv = uv0 + u * (uv1 - uv0) + v * (uv2 - uv0);
+
+    _Ray.u = uv.x;
+    _Ray.v = uv.y;
     _Ray.intersection.prim = this;
     _Ray.intersection.N = N;
-    _Ray.lastRefractiveIndex = material->refractionIndex;
     _Ray.intersection.color = material->color;
+    _Ray.lastRefractiveIndex = material->refractionIndex;
+    /*
+    if (_Ray.lastRefractiveIndex == material->refractionIndex)
+    else
+      _Ray.lastRefractiveIndex = material->refractionIndex;*/
   }
 }
 

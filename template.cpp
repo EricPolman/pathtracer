@@ -27,8 +27,8 @@ extern "C"
 #include "surface.h"
 #include "template.h"
 #include "fcntl.h"
-#include "InputManager.h"
 #include <time.h>
+#include "InputManager.h"
 
 namespace Tmpl8 { 
 void NotifyUser( char* s )

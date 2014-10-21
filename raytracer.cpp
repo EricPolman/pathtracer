@@ -3,6 +3,7 @@
 
 #include "template.h"
 #include "surface.h"
+#include "InputManager.h"
 
 using namespace Tmpl8;
 using namespace glm;
@@ -81,7 +82,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 0, -8), vec3(0, 0, 1));
+  camera.Set(vec3(0, 0, -10), vec3(0, 0, 1));
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
@@ -152,6 +153,16 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
       // generate primary ray
       Ray ray = _Renderer->camera.GenerateRay(x, y);
       // trace primary ray
+#ifdef _DEBUG
+      if (Input->IsMouseButtonDown(SDL_BUTTON_LEFT))
+      {
+        if (y == Input->GetMousePosition().y && x == Input->GetMousePosition().x)
+        {
+          __debugbreak();
+        }
+      }
+#endif
+
       vec3 color = _Renderer->TracePath(ray, 1);
       // visualize ray in 2D if y == 0, and for every 16th pixel
 
@@ -179,7 +190,7 @@ void Renderer::Render( )
   // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
   int midY = SCRHEIGHT / 2;
   Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
-  Trace(midRay, 1.0f);
+  TracePath(midRay, 0);
   camera.focusDistance = midRay.t;
 
   for (int x = 0; x < (SCRWIDTH / 2); x++)
