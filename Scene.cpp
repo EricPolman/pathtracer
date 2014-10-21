@@ -155,7 +155,8 @@ void Scene::SetupHeavyScene()
     triangles.push_back(i);
     //i->material->color = vec3(0.9f, 0.9f, 0.8f);
     //if (Random::value() > 0.8f)
-      //i->material->type = Material::PHONG;
+    i->material->type = Material::PHONG;
+    i->material->specularComponent = 20;
   }
   printf("Done parsing mesh.\n");
 }

@@ -179,9 +179,8 @@ void Renderer::Render( )
   // visualize ray in 2D if y == SCRHEIGHT / 2, and for every 16th pixel
   int midY = SCRHEIGHT / 2;
   Ray midRay = camera.GenerateSimpleRay(SCRWIDTH / 4, midY);
-  TracePath(midRay, 1.0f);
+  Trace(midRay, 1.0f);
   camera.focusDistance = midRay.t;
-
 
   for (int x = 0; x < (SCRWIDTH / 2); x++)
   {

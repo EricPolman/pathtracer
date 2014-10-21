@@ -38,6 +38,6 @@
 
 #define MIN_OBJECTS_IN_BVH_NODE 10
 
-#define MAX_BRIGHTNESS 16.0f
+#define MAX_BRIGHTNESS 8.0f
 
 typedef unsigned long Pixel;

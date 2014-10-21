@@ -4,19 +4,50 @@
 #include "BoxLight.h"
 
 // http://pathtracing.wordpress.com/2011/03/03/cosine-weighted-hemisphere/
-vec3 CosWeightedRandomHemisphereDirection2(vec3 n)
+vec3 RandomDiffuseDirection(vec3 n)
 {
   float r1 = Random::value();
   float r2 = Random::value();
 
-  float  theta = acosf(sqrtf(1.0f - r1));
-  float  phi = 2.0f * PI * r2;
+  float  theta = acosf(sqrtf(1.0f - r1)); // altitude
+  float  phi = 2.0f * PI * r2; // azimuth
 
   float xs = sinf(theta) * cosf(phi);
   float ys = cosf(theta);
   float zs = sinf(theta) * sinf(phi);
 
   vec3 y(n.x, n.y, n.z);
+  vec3 h = y;
+  if (fabs(h.x) <= fabs(h.y) && fabs(h.x) <= fabs(h.z))
+    h.x = 1.0;
+  else if (fabs(h.y) <= fabs(h.x) && fabs(h.y) <= fabs(h.z))
+    h.y = 1.0;
+  else
+    h.z = 1.0;
+
+  vec3 x = normalize(cross(h, y));
+  vec3 z = normalize(cross(x, y));
+
+  vec3 direction = xs * x + ys * y + zs * z;
+  return normalize(direction);
+}
+
+// Derived from a word file (https://www.cs.virginia.edu/~jdl/importance.doc)
+// Also used http://www.igorsklyar.com/system/documents/papers/4/fiscourse.comp.pdf 
+// for info on the PDF and CDF
+vec3 RandomSpecularDirection(vec3 _N, vec3 _R, Material& _Material)
+{
+  float r1 = Random::value();
+  float r2 = Random::value();
+
+  float  theta = acosf(powf(r1,  1 / (_Material.specularComponent + 1))); // altitude
+  float  phi = 2.0f * PI * r2; // azimuth
+
+  float xs = sinf(theta) * cosf(phi);
+  float ys = cosf(theta);
+  float zs = sinf(theta) * sinf(phi);
+
+  vec3 y(_R.x, _R.y, _R.z);
   vec3 h = y;
   if (fabs(h.x) <= fabs(h.y) && fabs(h.x) <= fabs(h.z))
     h.x = 1.0;
@@ -42,7 +73,7 @@ vec3 IlluminateLambertPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Mate
     rndVec = -rndVec;
   }
   rndVecDotN = dot(rndVec, _Ray.intersection.N);*/
-  vec3 rndVec = CosWeightedRandomHemisphereDirection2(_Ray.intersection.N);
+  vec3 rndVec = RandomDiffuseDirection(_Ray.intersection.N);
   float rndVecDotN = dot(rndVec, _Ray.intersection.N);
 
   Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
@@ -120,33 +151,36 @@ vec3 IlluminatePhong(Renderer& _Renderer, Ray& _Ray, Material& _Material)
   return color;
 }
 
-
 vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material)
 {
-  /*vec3 rndVec(-0.5f + Random::value(), -0.5f + Random::value(), -0.5f + Random::value());
-  rndVec = normalize(rndVec);
-  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
-  if (rndVecDotN < 0)
+  vec3 color;
+  const float diffCoeff = 1 - _Material.specularCoefficient;
+  float randRayType = Random::value();
+  if (randRayType < _Material.specularCoefficient) // Specular ray
   {
-    rndVec = -rndVec;
+    vec3 rndVec = RandomSpecularDirection(_Ray.intersection.N, reflect(_Ray.D, _Ray.intersection.N), _Material);
+    float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+
+    Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
+
+    color = _Renderer.TracePath(newRay, 0.0f, 0);
+
+    return color * _Material.color;// *_Material.specularCoefficient;
   }
-  rndVecDotN = dot(rndVec, _Ray.intersection.N);*/
-  vec3 reflectionVector = normalize(reflect(_Ray.D, _Ray.intersection.N));
-  vec3 rndVec = CosWeightedRandomHemisphereDirection2(reflectionVector);
-  float rndVecDotN = dot(rndVec, _Ray.intersection.N);
-  while (rndVecDotN < 0)
+  else // Diffuse ray
   {
-    vec3 rndVec = CosWeightedRandomHemisphereDirection2(reflectionVector);
-    rndVecDotN = dot(rndVec, _Ray.intersection.N);
+    vec3 rndVec = RandomDiffuseDirection(_Ray.intersection.N);
+    float rndVecDotN = dot(rndVec, _Ray.intersection.N);
+
+    Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
+
+    color = _Renderer.TracePath(newRay, 0.0f, 0);
+
+    //float pdf = 1.0f / PI * rndVecDotN;
+
+    return color * _Material.color;// *(1.0f - _Material.specularCoefficient);
   }
-  
-  Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, rndVec);
 
-  vec3 color = _Renderer.TracePath(recursiveRay, 0);
-  
-  float spec = powf(rndVecDotN, 20);
-
-  return color * _Material.color * spec;
 }
 
 vec3 IlluminateMirror(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _Depth, unsigned int _Debug = 0)
@@ -301,11 +335,11 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
         vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f
         vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
 
-        color += col * _Material.color * transparency * refrCoeff;
+        color += col * _Material.color * transparency;
       }
       else
       {
-        color += col * _Material.color * refrCoeff;
+        color += col * _Material.color;
       }
       //printf("%f\n", refrCoeff);
     }
@@ -316,7 +350,7 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
     Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);// +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.05f);
 
     vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug);
-    color += col * _Material.color * reflCoeff;
+    color += col * _Material.color;
   }
   return color;
 }
