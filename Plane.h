@@ -5,8 +5,8 @@ class Plane : public Primitive
 {
 public:
   // constructors
-  Plane() {}
-  Plane(vec3& _N, float _Dist) : N(_N), dist(_Dist) {}
+  Plane() { material = new Material; }
+  Plane(vec3& _N, float _Dist) : N(_N), dist(_Dist) { material = new Material; }
   Plane(vec3 _V0, vec3 _V1, vec3 _V2);
   // methods
   void Intersect(Ray& _Ray);

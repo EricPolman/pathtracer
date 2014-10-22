@@ -4,8 +4,8 @@ class Sphere : public Primitive
 {
 public:
   // constructors
-  Sphere() {}
-  Sphere(vec3 _Pos, float _Radius) : P(_Pos), r(_Radius) {}
+  Sphere() { material = new Material; }
+  Sphere(vec3 _Pos, float _Radius) : P(_Pos), r(_Radius) { material = new Material; }
   // methods
   void Intersect(Ray& _Ray);
   void Draw2D();

@@ -56,7 +56,7 @@ vec3 RandomSpecularDirection(vec3 _N, vec3 _R, Material& _Material)
   else
     h.z = 1.0;
 
-  vec3 x = normalize(cross(h, y));
+  vec3 x = normalize(cross(h, y)); 
   vec3 z = normalize(cross(x, y));
 
   vec3 direction = xs * x + ys * y + zs * z;
@@ -169,7 +169,10 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
 
     color = _Renderer.TracePath(newRay, 0.0f, 0);
 
-    return color * _Material.color;// *_Material.specularCoefficient;
+    if (_Material.texture)
+      return color * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+    else
+      return color * _Material.color;// * _Material.specularCoefficient
   }
   else // Diffuse ray
   {
@@ -182,7 +185,10 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
 
     //float pdf = 1.0f / PI * rndVecDotN;
 
-    return color * _Material.color;// *(1.0f - _Material.specularCoefficient);
+    if (_Material.texture)
+      return color * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+    else
+      return color * _Material.color;// *(1.0f - _Material.specularCoefficient);
   }
 
 }
@@ -201,7 +207,10 @@ vec3 IlluminateMirror(Renderer& _Renderer, Ray& _Ray, Material& _Material, int _
   {
     col = _Renderer.Trace(recursiveRay, _Depth + 1, _Debug);
   }
-  return col * _Material.reflection * _Material.color;
+  if (_Material.texture)
+    return col * _Material.reflection * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+  else
+    return col * _Material.reflection * _Material.color;
 }
 
 vec3 IlluminateMirrorPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Material, unsigned int _Debug = 0)
@@ -342,11 +351,11 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
         vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f
         vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
 
-        color += col * _Material.color * transparency;
+        color += col * transparency;
       }
       else
       {
-        color += col * _Material.color;
+        color += col;
       }
       //printf("%f\n", refrCoeff);
     }
@@ -357,9 +366,12 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
     Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);// +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.05f);
 
     vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug);
-    color += col * _Material.color;
+    color += col;
   }
-  return color;
+  if (_Material.texture)
+    return color * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+  else
+    return color * _Material.color;
 }
 
 vec3 Material::Illuminate(Renderer& _Renderer, Ray& _Ray, int _Depth, bool _PathTraced, unsigned int _Debug)

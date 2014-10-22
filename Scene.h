@@ -23,6 +23,7 @@ public:
   BvhNode* bvhRoot;
   Primitive** primList;
   std::vector<Triangle*> triangles;
+  std::vector<Material*> materials;
   int primCount;
 
   Primitive** lightList;

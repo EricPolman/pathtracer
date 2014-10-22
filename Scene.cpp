@@ -22,6 +22,9 @@ Scene::Scene()
   primCount = lightCount = 0;
 
   //SetupSphereScene();
+  materials.push_back(new Material);
+  materials[0]->type = Material::PHONG;
+  materials[0]->id = 0;
   SetupHeavyScene();
   BuildBVH();
 }
@@ -82,8 +85,8 @@ void Scene::SetupHeavyScene()
   primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
 
   primList[0]->material->type = Material::LIGHT;
-  //primList[1]->material->color = vec3(1, 0, 0);
-  //primList[2]->material->color = vec3(0, 1, 0);
+  primList[1]->material->color = vec3(1, 0, 0);
+  primList[2]->material->color = vec3(0, 1, 0);
   primList[3]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[4]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[5]->material->color = vec3(0.5f, 0.5f, 0.5f);
@@ -102,7 +105,8 @@ void Scene::SetupHeavyScene()
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);
-    i->material->texture = texture;
+    i->material = materials[0];
+    //i->material->texture = texture;
     //i->material->color = vec3(0.9f, 0.9f, 0.8f);
     //if (Random::value() > 0.8f)
     //i->material->type = Material::PHONG;

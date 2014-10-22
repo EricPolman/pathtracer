@@ -89,8 +89,11 @@ void Mesh::Load(const char* a_path)
   for (int i = 0; i < size; i += 3)
   {
     m_triangles.push_back(new Triangle(m_vertices[m_vertexIndices[i] - 1], m_vertices[m_vertexIndices[i + 1] - 1], m_vertices[m_vertexIndices[i + 2] - 1]));
-    m_triangles[m_triangles.size()-1]->uv0 = m_uvcoords[m_uvcoordIndices[i] - 1];
+    m_triangles[m_triangles.size() - 1]->uv0 = m_uvcoords[m_uvcoordIndices[i] - 1];
     m_triangles[m_triangles.size() - 1]->uv1 = m_uvcoords[m_uvcoordIndices[i + 1] - 1];
     m_triangles[m_triangles.size() - 1]->uv2 = m_uvcoords[m_uvcoordIndices[i + 2] - 1];
+    m_triangles[m_triangles.size() - 1]->n0 = m_normals[m_normalIndices[i] - 1];
+    m_triangles[m_triangles.size() - 1]->n1 = m_normals[m_normalIndices[i + 1] - 1];
+    m_triangles[m_triangles.size() - 1]->n2 = m_normals[m_normalIndices[i + 2] - 1];
   }
 }

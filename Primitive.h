@@ -11,7 +11,7 @@ struct AABB
 {
   AABB(const vec3& _min, const vec3& _max)
   : boundMin(_min), boundMax(_max) { }
-
+  AABB(){}
   vec3 boundMin, boundMax;
   float padding[2];
 
@@ -23,7 +23,7 @@ struct AABB
 class Primitive
 {
 public:
-  Primitive() : material(new Material()) {}
+  Primitive() : material(nullptr) {}
   virtual void Intersect(Ray& _Ray) = 0;
   virtual void Draw2D() = 0;
   Material* material;				// primitive material

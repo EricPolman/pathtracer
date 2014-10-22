@@ -31,6 +31,9 @@ AABB AABB::CreateFromTriangle(const Triangle& _Tri)
 
 AABB AABB::CreateFromTriangles(Triangle** _Tris, int _Count)
 {
+  if (_Count == 0)
+    return AABB(vec3(),vec3());
+
   vec3 bmin(1e34f, 1e34f, 1e34f);
   vec3 bmax(-1e34f, -1e34f, -1e34f);
   for (int i = 0; i < _Count; ++i)

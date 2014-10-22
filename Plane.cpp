@@ -9,7 +9,7 @@ Plane::Plane(vec3 _V0, vec3 _V1, vec3 _V2)
   const vec3 e1 = _V1 - _V0, e2 = _V2 - _V0;
   N = normalize(cross(e1, e2));
   dist = dot(_V0, N);
-  material = 0;
+  material = new Material();
 }
 
 void Plane::Intersect(Ray& _Ray)
