@@ -348,7 +348,7 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
       //recursiveRay.Draw2D();
       if (leaving) // Absorp according to Beer's law
       {
-        vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t; // Constant should be 0.15f
+        vec3 absorbance = recursiveRay.intersection.color * 0.05f * -recursiveRay.t; // Constant should be 0.15f
         vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
 
         color += col * transparency;

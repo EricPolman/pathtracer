@@ -173,7 +173,7 @@ void BvhNode::Build(Triangle** _Tris, int _Count, const AABB& _RootBox, int _Dep
       splitPlaneCandidates.push_back(SplitPlane(center - extendZ + (delta * (float)z * vec3(0, 0, 1)), extendZ / extendZ.z));
     }
 
-    /*for (int i = 0; i < _Count; ++i)
+    for (int i = 0; i < _Count; ++i)
     {
       const AABB triBox = AABB::CreateFromTriangle(*_Tris[i]);
       const vec3 triBoxCenter = (triBox.boundMin + triBox.boundMax) * 0.5f;
@@ -190,7 +190,7 @@ void BvhNode::Build(Triangle** _Tris, int _Count, const AABB& _RootBox, int _Dep
       const vec3 triBoxZ(0, 0, triBoxExtends.z);
       splitPlaneCandidates.push_back(SplitPlane(triBoxCenter + triBoxZ, triBoxZ / triBoxZ.z));
       splitPlaneCandidates.push_back(SplitPlane(triBoxCenter - triBoxZ, -triBoxZ / triBoxZ.z));
-    }*/
+    }
 
     // Split this thing yo
     int p = Partition(_Tris, _Count, _RootBox);
@@ -240,13 +240,13 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox)
       if (v0dot >= 0 || v1dot >= 0 || v2dot >= 0)
         rightTriangles.push_back(triangles[i]);
 
-      vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
+      /*vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
       center /= 3;
 
       if (dot(center - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal) <= 0)
         leftTriangles.push_back(triangles[i]);
       else
-        rightTriangles.push_back(triangles[i]);
+        rightTriangles.push_back(triangles[i]);*/
     }
 
     // Calculate costs and evaluate best split
@@ -284,7 +284,7 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox)
       rightTriangles.push_back(triangles[i]);
   }
 
-  _cost = currentBestCost;
+  //_cost = currentBestCost;
 #else
   // Centroid Split approach
   // Get center

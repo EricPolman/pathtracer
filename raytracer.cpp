@@ -16,11 +16,13 @@ using namespace glm;
 #include <functional>
 #include "BvhNode.h"
 #include "JobDelegator.h"
+#include "Texture.h"
 
 extern Surface* screen; // defined in template.cpp
 
 Renderer* RenderTileJob::renderer;
 RenderTileJob renderJobs[SCRHEIGHT / TILE_SIZE][SCRWIDTH / 2 / TILE_SIZE];
+Texture* skyDome;
 
 // draw a line using world space coordinates
 void Renderer::Line2D( float x1, float y1, float x2, float y2, unsigned int c )
@@ -86,7 +88,9 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 0, -15), vec3(0, 0, 1));
+  camera.Set(vec3(0, 3, -10), vec3(0, 0, 1));
+  skyDome = new Texture();
+  skyDome->Load("resources/sky.jpg");
   RenderTileJob::renderer = this;
   for (int y = 0; y < SCRHEIGHT / TILE_SIZE; ++y)
   {
@@ -134,8 +138,11 @@ vec3 Renderer::TracePath(Ray& _Ray, float _CurrentProbability, unsigned int _Deb
   float distance = _Ray.t;
 
   if (_Ray.t > 1e33f)
-    return vec3();
-
+  {
+    // Skydome
+    vec2 uv = vec2(atan2(_Ray.D.z, _Ray.D.x) / PI / 2, acos(_Ray.D.y) / PI);
+    return skyDome->GetPixel(uv.x, uv.y) / ROULETTE_SURVIVAL_CHANCE;
+  }
   //if (depth > MAX_TRACE_DEPTH)
   //  return _Ray.intersection.color;
   vec3 color;
@@ -207,13 +214,13 @@ void Renderer::RenderTilePathTraced(int _X, int _Y, int _TileSize, Pixel* _Buffe
       Ray ray = _Renderer->camera.GenerateRay(x, y);
       // trace primary ray
 #ifdef _DEBUG
-      if (Input->IsMouseButtonDown(SDL_BUTTON_LEFT))
+      /*if (Input->IsMouseButtonDown(SDL_BUTTON_LEFT))
       {
         if (y == Input->GetMousePosition().y && x == Input->GetMousePosition().x)
         {
           __debugbreak();
         }
-      }
+      }*/
 #endif
 
       vec3 color = _Renderer->TracePath(ray, 1);

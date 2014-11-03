@@ -11,7 +11,7 @@
 
 Mesh* mesh;
 Texture* texture;
-auto path = "resources/mace_hq.obj";
+auto path = "resources/prettyScene/walls.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
@@ -23,9 +23,29 @@ Scene::Scene()
 
   //SetupSphereScene();
   materials.push_back(new Material);
-  materials[0]->type = Material::PHONG;
-  //materials[0]->color = vec3(0.3f, 0.3f, 0.3f);
+  materials.push_back(new Material);
+  materials.push_back(new Material);
+
+  // Walls
   materials[0]->id = 0;
+  texture = new Texture();
+  auto normalMap = new Texture();
+  texture->Load("resources/brickwall/wall_diffuse.jpg");
+  normalMap->Load("resources/brickwall/wall_normal.jpg");
+  materials[0]->texture = texture;
+
+  // Path
+  materials[1]->id = 1;
+  texture = new Texture();
+  normalMap = new Texture();
+  texture->Load("resources/path/cobblestone.jpg");
+  normalMap->Load("resources/path/cobblestone_normal.jpg");
+  materials[1]->texture = texture;
+
+
+  materials[2]->id = 2;
+  materials[2]->color = vec3(0.3f, 0.3f, 0.3f);
+  //materials[2]->type = Material::PHONG;
   SetupHeavyScene();
   BuildBVH();
 }
@@ -78,41 +98,39 @@ void Scene::SetupSphereScene()
 
 void Scene::SetupHeavyScene()
 {
-  primList[primCount++] = new Plane(vec3(0, -1, 0), -20);
-  primList[primCount++] = new Plane(vec3(-1, 0, 0), -20);
-  primList[primCount++] = new Plane(vec3(1, 0, 0), -20);
-  primList[primCount++] = new Plane(vec3(0, 1, 0), -4);
-  primList[primCount++] = new Plane(vec3(0, 0, -1), -20);
-  primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
+  primList[primCount++] = new Plane(vec3(0, 1, 0), -1);
 
-  primList[0]->material->type = Material::LIGHT;
-  primList[0]->material->color *= 2.0f;
-  primList[1]->material->color = vec3(1, 0, 0);
-  primList[2]->material->color = vec3(0, 1, 0);
-  primList[3]->material->color = vec3(0.5f, 0.5f, 0.5f);
-  primList[4]->material->color = vec3(0.5f, 0.5f, 0.5f);
-  primList[5]->material->color = vec3(0.5f, 0.5f, 0.5f);
-
-  primList[primCount++] = new Sphere(vec3(0, 0, -10), 2);
-  primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  primList[primCount - 1]->material->refractionIndex = 1.5f;
-
-  printf("Loading texture.\n");
-  texture = new Texture();
-  texture->Load("resources/box_texture.png");
-  printf("Done loading texture.\n");
+  //primList[primCount++] = new Sphere(vec3(0, 0, 0), 4);
+  //primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  //primList[primCount - 1]->material->refractionIndex = 1.0f;
 
   printf("Parsing mesh.\n");
-  mesh = new Mesh(path);
+  /*mesh = new Mesh("resources/prettyScene/walls.obj");
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);
     i->material = materials[0];
-    //i->material->texture = texture;
-    //i->material->color = vec3(0.9f, 0.9f, 0.8f);
-    //if (Random::value() > 0.8f)
-    //i->material->type = Material::PHONG;
+  }*/
+
+  mesh = new Mesh("resources/prettyScene/path.obj");
+  for (auto i : mesh->m_triangles)
+  {
+    triangles.push_back(i);
+    i->material = materials[1];
   }
+
+  mesh = new Mesh("resources/prettyScene/weaponStand.obj");
+  for (auto i : mesh->m_triangles)
+  {
+    triangles.push_back(i);
+    i->material = materials[2];
+  }
+  /*mesh = new Mesh("resources/sahtest.obj");
+  for (auto i : mesh->m_triangles)
+  {
+    triangles.push_back(i);
+    i->material = materials[1];
+  }*/
   printf("Done parsing mesh.\n");
 }
 
@@ -123,7 +141,7 @@ void Scene::BuildBVH()
   printf("Done generating BV.\n");
   bvhRoot = new BvhNode(rootBox.boundMin, rootBox.boundMax);
   printf("Building root node.\n");
-  bvhRoot->Build(&triangles[0], triangles.size(), rootBox, -1);
+  bvhRoot->Build(&triangles[0], triangles.size(), rootBox, 0);
 
   printf("Going through splitQueue.\n");
   while (BvhNode::splitQueue.size() > 0)

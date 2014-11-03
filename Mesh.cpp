@@ -5,7 +5,7 @@
 #include <fstream>
 #include "Triangle.h"
 
-#define SCALE_FACTOR 0.1f
+#define SCALE_FACTOR 0.01f
 
 Mesh::Mesh(const char* a_path)
 {

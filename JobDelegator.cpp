@@ -1,6 +1,6 @@
 #include "JobDelegator.h"
 
-int JobDelegator::g_numThreads = std::thread::hardware_concurrency() - 1; // 1 for main, 1 for input
+int JobDelegator::g_numThreads = std::thread::hardware_concurrency() - 2; // 1 for main, 1 for input
 JobDelegator* JobDelegator::singleton;
 
 JobDelegator::JobDelegator()

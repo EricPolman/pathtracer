@@ -17,6 +17,7 @@ void Camera::Set(vec3 _Pos, vec3 _Direction)
   // set position and view direction, then calculate screen corners
   eyePos = _Pos;
   V = _Direction;
+  focusDistance = min(focusDistance, 30.0f);
 
   right = glm::cross(V, glm::vec3(0, -1, 0));
   up = glm::cross(V, right);
