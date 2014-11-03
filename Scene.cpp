@@ -24,7 +24,6 @@ void Scene::AddMaterial(Material* mat)
 Scene::Scene()
 {
   primList = new Primitive*[128]; // todo: this is going to bite us one day
-  lightList = new Primitive*[128];
   primCount = lightCount = 0;
 
   //SetupSphereScene();
@@ -107,9 +106,8 @@ void Scene::BuildBVH()
   printf("Generating BV for entire mesh.\n");
   rootBox = AABB::CreateFromTriangles(&triangles[0], triangles.size());
   printf("Done generating BV.\n");
-  bvhRoot = new BvhNode(rootBox.boundMin, rootBox.boundMax);
+  bvhRoot = new BvhNode(&triangles[0], triangles.size(), rootBox, 0);
   printf("Building root node.\n");
-  bvhRoot->Build(&triangles[0], triangles.size(), rootBox, 0);
 
   printf("Going through splitQueue.\n");
   while (BvhNode::splitQueue.size() > 0)
@@ -118,25 +116,15 @@ void Scene::BuildBVH()
     BvhNode::splitQueue.pop();
 
     printf("%i\t%i\t%i\n", instr.p, instr.count, instr.depth);
-    //if (instr.p == instr.count)
-    //  continue;
 
     // Get BV for left
     if (instr.p > 0)
     {
-      AABB bvLeft = AABB::CreateFromTriangles(instr.tris, instr.p);
-
-      // Get BV for right
-      instr.node->left = new BvhNode(bvLeft.boundMin, bvLeft.boundMax);
-
-      instr.node->left->Build(instr.tris, instr.p, rootBox, instr.depth);
+      instr.node->left = new BvhNode(instr.tris, instr.p, rootBox, instr.depth);
     }
     if (instr.p < instr.count)
     {
-      AABB bvRight = AABB::CreateFromTriangles(instr.tris + instr.p, instr.count - instr.p);
-      instr.node->right = new BvhNode(bvRight.boundMin, bvRight.boundMax);
-
-      instr.node->right->Build(instr.tris + instr.p, instr.count - instr.p, rootBox, instr.depth);
+      instr.node->right = new BvhNode(instr.tris + instr.p, instr.count - instr.p, rootBox, instr.depth);
     }
   }
   printf("BVH done.\n");

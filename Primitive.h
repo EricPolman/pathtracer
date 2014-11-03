@@ -9,10 +9,10 @@ class Triangle;
 
 struct AABB
 {
-  AABB(const vec3& _min, const vec3& _max)
-  : boundMin(_min), boundMax(_max) { }
+  AABB(const vec3& a_min, const vec3& a_max)
+  : _min(a_min), _max(a_max) { }
   AABB(){}
-  vec3 boundMin, boundMax;
+  vec3 _min, _max;
   float padding[2];
 
   static AABB CreateFromTriangle(const Triangle& _Tri);

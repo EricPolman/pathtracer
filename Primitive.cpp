@@ -67,8 +67,8 @@ AABB AABB::CreateFromTriangles(Triangle** _Tris, int _Count)
 
 void AABB::Draw2D()
 {
-  Renderer::Line2D(boundMin.x, boundMin.z, boundMin.x, boundMax.z, 0xff00ff);
-  Renderer::Line2D(boundMin.x, boundMin.z, boundMax.x, boundMin.z, 0xff00ff);
-  Renderer::Line2D(boundMax.x, boundMin.z, boundMax.x, boundMax.z, 0xff00ff);
-  Renderer::Line2D(boundMax.x, boundMax.z, boundMin.x, boundMax.z, 0xff00ff);
+  Renderer::Line2D(_min.x, _min.z, _min.x, _max.z, 0xff00ff);
+  Renderer::Line2D(_min.x, _min.z, _max.x, _min.z, 0xff00ff);
+  Renderer::Line2D(_max.x, _min.z, _max.x, _max.z, 0xff00ff);
+  Renderer::Line2D(_max.x, _max.z, _min.x, _max.z, 0xff00ff);
 }
