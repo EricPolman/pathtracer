@@ -34,6 +34,31 @@ Scene::Scene()
   materials.push_back(new Material);
   materials.push_back(new Material);
 
+  // Walls
+  materials[0]->id = 0;
+  texture = new Texture();
+  texture->Load("resources/brickwall/wall_diffuse.jpg");
+  materials[0]->texture = texture;
+
+  // Path
+  materials[1]->id = 1;
+  texture = new Texture();
+  texture->Load("resources/path/cobblestone.jpg");
+  materials[1]->texture = texture;
+
+  materials[2]->id = 2;
+  materials[2]->color = vec3(0.7f, 0.7f, 0.6f);
+
+  materials[3]->id = 3;
+  materials[3]->color = vec3(0.3f, 0.3f, 0.3f);
+  materials[3]->type = Material::PHONG;
+
+  materials[4]->id = 4;
+  materials[4]->type = Material::LIGHT;
+  texture = new Texture();
+  texture->Load("resources/rainbowBall.jpg");
+  materials[4]->texture = texture;
+
   SetupHeavyScene();
   BuildBVH();
 }
@@ -88,9 +113,9 @@ void Scene::SetupHeavyScene()
 {
   primList[primCount++] = new Plane(vec3(0, 1, 0), -1);
 
-  primList[primCount++] = new Sphere(vec3(0, 1, -13), 2);
-  primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  primList[primCount - 1]->material->refractionIndex = 1.4f;
+  //primList[primCount++] = new Sphere(vec3(0, 0, 0), 4);
+  //primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  //primList[primCount - 1]->material->refractionIndex = 1.0f;
 
   printf("Parsing mesh.\n");
   mesh = new Mesh("resources/prettyScene/all.obj");
