@@ -24,7 +24,8 @@ public:
   AABB rootBox;
   Primitive** primList;
   std::vector<Triangle*> triangles;
-  std::vector<Material*> materials;
+  static std::vector<Material*> materials;
+  static void AddMaterial(Material* mat);
   int primCount;
 
 

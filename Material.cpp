@@ -416,6 +416,8 @@ vec3 Material::Illuminate(Renderer& _Renderer, Ray& _Ray, int _Depth, bool _Path
       return IlluminateDielectricPathTraced(_Renderer, _Ray, *this, _Debug);
       break;
     case LIGHT:
+      if (texture != nullptr)
+        return texture->GetPixel(_Ray.u, _Ray.v);
       return color;
       break;
     case UNLIT:

@@ -11,9 +11,15 @@
 
 Mesh* mesh;
 Texture* texture;
-auto path = "resources/prettyScene/walls.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
+
+std::vector<Material*> Scene::materials;
+void Scene::AddMaterial(Material* mat)
+{
+  materials.push_back(mat);
+  mat->id = materials.size() - 1;
+}
 
 Scene::Scene()
 {
@@ -25,27 +31,34 @@ Scene::Scene()
   materials.push_back(new Material);
   materials.push_back(new Material);
   materials.push_back(new Material);
+  materials.push_back(new Material);
+  materials.push_back(new Material);
 
   // Walls
   materials[0]->id = 0;
   texture = new Texture();
-  auto normalMap = new Texture();
   texture->Load("resources/brickwall/wall_diffuse.jpg");
-  normalMap->Load("resources/brickwall/wall_normal.jpg");
   materials[0]->texture = texture;
 
   // Path
   materials[1]->id = 1;
   texture = new Texture();
-  normalMap = new Texture();
   texture->Load("resources/path/cobblestone.jpg");
-  normalMap->Load("resources/path/cobblestone_normal.jpg");
   materials[1]->texture = texture;
 
-
   materials[2]->id = 2;
-  materials[2]->color = vec3(0.3f, 0.3f, 0.3f);
-  //materials[2]->type = Material::PHONG;
+  materials[2]->color = vec3(0.7f, 0.7f, 0.6f);
+
+  materials[3]->id = 3;
+  materials[3]->color = vec3(0.3f, 0.3f, 0.3f);
+  materials[3]->type = Material::PHONG;
+
+  materials[4]->id = 4;
+  materials[4]->type = Material::LIGHT;
+  texture = new Texture();
+  texture->Load("resources/rainbowBall.jpg");
+  materials[4]->texture = texture;
+
   SetupHeavyScene();
   BuildBVH();
 }
@@ -105,32 +118,12 @@ void Scene::SetupHeavyScene()
   //primList[primCount - 1]->material->refractionIndex = 1.0f;
 
   printf("Parsing mesh.\n");
-  /*mesh = new Mesh("resources/prettyScene/walls.obj");
+  mesh = new Mesh("resources/prettyScene/all.obj");
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);
-    i->material = materials[0];
-  }*/
-
-  mesh = new Mesh("resources/prettyScene/path.obj");
-  for (auto i : mesh->m_triangles)
-  {
-    triangles.push_back(i);
-    i->material = materials[1];
   }
 
-  mesh = new Mesh("resources/prettyScene/weaponStand.obj");
-  for (auto i : mesh->m_triangles)
-  {
-    triangles.push_back(i);
-    i->material = materials[2];
-  }
-  /*mesh = new Mesh("resources/sahtest.obj");
-  for (auto i : mesh->m_triangles)
-  {
-    triangles.push_back(i);
-    i->material = materials[1];
-  }*/
   printf("Done parsing mesh.\n");
 }
 

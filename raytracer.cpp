@@ -88,7 +88,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 3, -10), vec3(0, 0, 1));
+  camera.Set(vec3(0, 1, -10), vec3(0, 0, 1));
   skyDome = new Texture();
   skyDome->Load("resources/sky.jpg");
   RenderTileJob::renderer = this;
@@ -141,6 +141,9 @@ vec3 Renderer::TracePath(Ray& _Ray, float _CurrentProbability, unsigned int _Deb
   {
     // Skydome
     vec2 uv = vec2(atan2(_Ray.D.z, _Ray.D.x) / PI / 2, acos(_Ray.D.y) / PI);
+    //printf("%f\t%f\n", uv.x, uv.y);
+    uv.x = fabsf(uv.x);
+    uv.y = fabsf(uv.y);
     return skyDome->GetPixel(uv.x, uv.y) / ROULETTE_SURVIVAL_CHANCE;
   }
   //if (depth > MAX_TRACE_DEPTH)
