@@ -16,7 +16,7 @@ class Material
 {
 public:
   enum Type { UNLIT, LAMBERT, PHONG, MIRROR, DIELECTRIC, LIGHT };
-  Material():color(1,1,1), refractionIndex(1), type(LAMBERT), specularCoefficient(1), specularComponent(1), texture(nullptr){}
+  Material():color(1,1,1), refractionIndex(1), type(LAMBERT), specularCoefficient(1), specularComponent(1), texture(nullptr), normalMap(nullptr){}
   int id;
   vec3 color;						// color of material
   Type type;
@@ -24,5 +24,6 @@ public:
   float refractionIndex;
   float specularCoefficient, specularComponent;
   Texture* texture;
+  Texture* normalMap;
   vec3 Illuminate(Renderer&, Ray&, int _Depth, bool _PathTraced, unsigned int _Debug = 0);
 };

@@ -9,7 +9,7 @@ void Sphere::Intersect(Ray& _Ray)
   bool invertNormal = false;
   // find the intersection of a ray and a sphere
   // http://www.ccs.neu.edu/home/fell/CSU540/programs/RayTracingFormulas.htm
-  float t = 1e34;
+  float t = 1e34f;
   float a = dot(_Ray.D, _Ray.D), b = 2.0f * dot(_Ray.D, _Ray.O - P);
   float c = dot(P, P) + dot(_Ray.O, _Ray.O) - 2.0f * dot(P, _Ray.O) - r * r;
   float d = b * b - 4 * a * c;
@@ -29,7 +29,8 @@ void Sphere::Intersect(Ray& _Ray)
     _Ray.t = t;
     _Ray.intersection.position = _Ray.O + _Ray.D * t;
     _Ray.intersection.prim = this;
-    _Ray.intersection.N = normalize(_Ray.intersection.position - P); 
+    _Ray.intersection.N = normalize(_Ray.intersection.position - P);
+    _Ray.intersection.geomN = _Ray.intersection.N;
     if (invertNormal) // Leaving object
     {
       _Ray.intersection.N *= -1;

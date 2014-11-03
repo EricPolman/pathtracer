@@ -23,6 +23,7 @@ void Plane::Intersect(Ray& _Ray)
     _Ray.intersection.position = _Ray.D * t + _Ray.O;
     _Ray.intersection.prim = this;
     _Ray.intersection.N = N;
+    _Ray.intersection.geomN = N;
     if (material) _Ray.intersection.color = material->color;
   }
 }

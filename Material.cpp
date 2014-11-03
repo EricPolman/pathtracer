@@ -40,7 +40,7 @@ vec3 RandomSpecularDirection(vec3 _N, vec3 _R, Material& _Material)
   float r1 = Random::value();
   float r2 = Random::value();
 
-  float  theta = acosf(powf(r1,  1 / (_Material.specularComponent + 1))); // altitude
+  float  theta = acosf(powf(r1,  1.0f / (_Material.specularComponent + 1.0f))); // altitude
   float  phi = 2.0f * PI * r2; // azimuth
 
   float xs = sinf(theta) * cosf(phi);
@@ -162,7 +162,7 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
   float randRayType = Random::value();
   if (randRayType < _Material.specularCoefficient) // Specular ray
   {
-    vec3 rndVec = RandomSpecularDirection(_Ray.intersection.N, reflect(_Ray.D, _Ray.intersection.N), _Material);
+    vec3 rndVec = RandomSpecularDirection(_Ray.intersection.N, reflect(_Ray.D, _Ray.intersection.geomN), _Material);
     float rndVecDotN = dot(rndVec, _Ray.intersection.N);
 
     Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);

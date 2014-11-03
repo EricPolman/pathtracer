@@ -3,13 +3,14 @@
 #include <vector>
 #include <queue>
 
+class AABB;
 class Ray;
 class Triangle;
 class BvhNode;
 
 using namespace glm;
 
-struct SplitInstruction { BvhNode* node; Triangle** tris; int p; int count; };
+struct SplitInstruction { BvhNode* node; Triangle** tris; int p; int count; int depth; };
 
 class BvhNode
 {
@@ -31,8 +32,8 @@ public:
   bool Intersect(Ray& _Ray);
   void Draw2D();
 
-  void Build(Triangle** triangles, int count);
-  int Partition(Triangle** triangles, int count);
+  void Build(Triangle** triangles, int count, const AABB& _RootBox, int _Depth);
+  int Partition(Triangle** triangles, int count, const AABB& _RootBox);
   
   static std::queue<SplitInstruction> splitQueue;
 };

@@ -6,6 +6,9 @@
 #include <map>
 #include <vector>
 
+static const int COST_TRAVERSAL = 0.5f;
+static const int COST_INTERSECT = 1.0f;
+
 struct SplitPlane
 {
   SplitPlane(const vec3& p, const vec3& n) : position(p), normal(n) { }
@@ -18,6 +21,17 @@ struct SplitPlane
 
 std::queue<SplitInstruction> BvhNode::splitQueue;
 std::vector<SplitPlane> splitPlaneCandidates;
+
+bool AabbAabbIntersect(const AABB &a, const AABB &b)
+{
+  if (a.boundMax.x < b.boundMin.x) return false; 
+  if (a.boundMin.x > b.boundMax.x) return false; 
+  if (a.boundMax.y < b.boundMin.y) return false; 
+  if (a.boundMin.y > b.boundMax.y) return false; 
+  if (a.boundMax.z < b.boundMin.z) return false; 
+  if (a.boundMin.z > b.boundMax.z) return false; 
+  return true;
+}
 
 
 BvhNode::BvhNode(const vec3& b0, const vec3& b1)
@@ -55,22 +69,24 @@ void BvhNode::Draw2D()
   }
 }
 
+float SurfaceAreaHeuristic(int numLeft, float areaLeft, int numRight, float areaRight, int numMiddle)
+{
+  float factor = 1.0f;
+
+  if (numMiddle == 0)
+    factor *= 0.7f;
+
+  if (numLeft == 0 || numRight == 0)
+    factor *= 0.7f;
+
+  return factor * (COST_TRAVERSAL * 2.0f + COST_INTERSECT * (numLeft * areaLeft + numRight * areaRight));
+}
+
 float GetSurfaceArea(const AABB& box)
 {
   vec3 size = box.boundMax - box.boundMin;
   return 2.0f * (size.x * size.y + size.x * size.z + size.z * size.y);
 }
-
-float TraverseCost()
-{
-  return 0.0f;
-}
-
-float IntersectionCost()
-{
-  return 0.0f;
-}
-
 
 bool BvhNode::Intersect(Ray& _Ray)
 {
@@ -119,7 +135,8 @@ bool BvhNode::Intersect(Ray& _Ray)
   return false;
 }
 
-void BvhNode::Build(Triangle** _Tris, int _Count)
+#define PLANES_PER_AXIS 1
+void BvhNode::Build(Triangle** _Tris, int _Count, const AABB& _RootBox, int _Depth)
 {
   // Real-Time Collision Detection p.240
   // Top-down Construction of BVH
@@ -132,7 +149,31 @@ void BvhNode::Build(Triangle** _Tris, int _Count)
   }
   else
   {
-    for (int i = 0; i < _Count; ++i)
+    splitPlaneCandidates.clear();
+
+    const vec3 center = (bound0 + bound1) * 0.5f;
+    const vec3 extends = (bound1 - center);
+    const vec3 delta = extends * (1.0f / ((float)PLANES_PER_AXIS + 1.0f)) * 2.0f;
+    const vec3 extendX = vec3(extends.x, 0, 0);
+    const vec3 extendY = vec3(0, extends.y, 0);
+    const vec3 extendZ = vec3(0, 0, extends.z);
+
+    for (int x = 1; x < PLANES_PER_AXIS + 1; ++x)
+    {
+      splitPlaneCandidates.push_back(SplitPlane(center - extendX + (delta * (float)x * vec3(1,0,0)), extendX / extendX.x));
+    }
+
+    for (int y = 1; y < PLANES_PER_AXIS + 1; ++y)
+    {
+      splitPlaneCandidates.push_back(SplitPlane(center - extendY + (delta * (float)y * vec3(0, 1, 0)), extendY / extendY.y));
+    }
+
+    for (int z = 1; z < PLANES_PER_AXIS + 1; ++z)
+    {
+      splitPlaneCandidates.push_back(SplitPlane(center - extendZ + (delta * (float)z * vec3(0, 0, 1)), extendZ / extendZ.z));
+    }
+
+    /*for (int i = 0; i < _Count; ++i)
     {
       const AABB triBox = AABB::CreateFromTriangle(*_Tris[i]);
       const vec3 triBoxCenter = (triBox.boundMin + triBox.boundMax) * 0.5f;
@@ -149,10 +190,10 @@ void BvhNode::Build(Triangle** _Tris, int _Count)
       const vec3 triBoxZ(0, 0, triBoxExtends.z);
       splitPlaneCandidates.push_back(SplitPlane(triBoxCenter + triBoxZ, triBoxZ / triBoxZ.z));
       splitPlaneCandidates.push_back(SplitPlane(triBoxCenter - triBoxZ, -triBoxZ / triBoxZ.z));
-    }
+    }*/
 
     // Split this thing yo
-    int p = Partition(_Tris, _Count);
+    int p = Partition(_Tris, _Count, _RootBox);
 
     if (p == _Count || p == 0)
     {
@@ -167,60 +208,85 @@ void BvhNode::Build(Triangle** _Tris, int _Count)
       instr.p = p;
       instr.tris = _Tris;
       instr.count = _Count;
+      instr.depth = _Depth + 1;
 
       splitQueue.push(instr);
     }
   }
 }
 
+//#define USE_SAH
 static int roundRobin = 0;
-int BvhNode::Partition(Triangle** triangles, int count)
+int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox)
 {
-  static std::vector<Triangle*> onTheLeft;
-  static std::vector<Triangle*> onTheRight;
-
-  /*// Naive SAH approach
-  SplitPlane* currentBestCandidate = nullptr;
+  std::vector<Triangle*> leftTriangles, rightTriangles;
+  const float rootArea = GetSurfaceArea(_RootBox);
+#ifdef USE_SAH
+  int currentBestCandidate = -10;
   float currentBestCost = 1e34f;
-  for (auto splane : splitPlaneCandidates)
+  for (int p = 0; p < splitPlaneCandidates.size(); ++p)
   {
-    onTheLeft.clear();
-    onTheRight.clear();
+    leftTriangles.clear();
+    rightTriangles.clear();
 
     for (int i = 0; i < count; ++i)
     {
-      bool onLeft = false, onRight = false;
-
-      float v0dot = dot(triangles[i]->v0 - splane.position, splane.normal);
-      float v1dot = dot(triangles[i]->v1 - splane.position, splane.normal);
-      float v2dot = dot(triangles[i]->v2 - splane.position, splane.normal);
+      float v0dot = dot(triangles[i]->v0 - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal);
+      float v1dot = dot(triangles[i]->v1 - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal);
+      float v2dot = dot(triangles[i]->v2 - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal);
 
       if (v0dot < 0 || v1dot < 0 || v2dot < 0)
-        onLeft = true;
+        leftTriangles.push_back(triangles[i]);
       if (v0dot >= 0 || v1dot >= 0 || v2dot >= 0)
-        onRight = true;
+        rightTriangles.push_back(triangles[i]);
 
-      if (onLeft && onRight)
-        onTheLeft.push_back(triangles[i]);
-      else if (onLeft)
-        onTheLeft.push_back(triangles[i]);
+      vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
+      center /= 3;
+
+      if (dot(center - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal) <= 0)
+        leftTriangles.push_back(triangles[i]);
       else
-        onTheRight.push_back(triangles[i]);
+        rightTriangles.push_back(triangles[i]);
     }
 
     // Calculate costs and evaluate best split
+    AABB leftAABB(bound0, bound1 - (splitPlaneCandidates[p].normal * (bound1 - splitPlaneCandidates[p].position)));
+    AABB rightAABB(bound1 - (splitPlaneCandidates[p].normal * (bound1 - splitPlaneCandidates[p].position)), bound1);
+    
+    //if (left > 0)
+    //  leftAABB = AABB::CreateFromTriangles(&leftTriangles[0], leftTriangles.size());
+    //if (right > 0)
+    //  rightAABB = AABB::CreateFromTriangles(&rightTriangles[0], rightTriangles.size());
 
-    AABB leftAABB; if (onTheLeft.size() > 0) leftAABB = AABB::CreateFromTriangles(&onTheLeft[0], onTheLeft.size());
-    AABB rightAABB; if (onTheRight.size() > 0) rightAABB = AABB::CreateFromTriangles(&onTheRight[0], onTheRight.size());
-    float totalSurface = GetSurfaceArea(leftAABB) + GetSurfaceArea(rightAABB);
-    if (totalSurface < currentBestCost)
+    float leftArea = GetSurfaceArea(leftAABB) / rootArea;
+    float rightArea = GetSurfaceArea(rightAABB) / rootArea;
+
+    float totalCost = SurfaceAreaHeuristic(leftTriangles.size(), leftArea, rightTriangles.size(), rightArea, leftTriangles.size() + rightTriangles.size() - count);
+    if (totalCost < currentBestCost)
     {
-      currentBestCost = totalSurface;
-      currentBestCandidate = &splane;
+      currentBestCost = totalCost;
+      currentBestCandidate = p;
     }
-  }*/
+  }
 
-  // Non-SAH approach (naive)
+  leftTriangles.clear();
+  rightTriangles.clear();
+  if (++roundRobin > 2)
+    roundRobin = 0;
+  for (int i = 0; i < count; ++i)
+  {
+    vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
+    center /= 3;
+
+    if (dot(center - splitPlaneCandidates[currentBestCandidate].position, splitPlaneCandidates[currentBestCandidate].normal) <= 0)
+      leftTriangles.push_back(triangles[i]);
+    else
+      rightTriangles.push_back(triangles[i]);
+  }
+
+  _cost = currentBestCost;
+#else
+  // Centroid Split approach
   // Get center
   vec3 bvCenter = (bound0 + bound1) * 0.5f;
 
@@ -236,40 +302,29 @@ int BvhNode::Partition(Triangle** triangles, int count)
   else
     spNormal = vec3(0, 0, 1);
 
-  onTheLeft.clear();
-  onTheRight.clear();
+  leftTriangles.clear();
+  rightTriangles.clear();
 
   for (int i = 0; i < count; ++i)
   {
-    bool onLeft = false, onRight = false;
-
     // < 0 == left, >= 0 == right
-    float v0dot = dot(triangles[i]->v0 - bvCenter, spNormal);
-    float v1dot = dot(triangles[i]->v1 - bvCenter, spNormal);
-    float v2dot = dot(triangles[i]->v2 - bvCenter, spNormal);
+    vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
+    center /= 3;
 
-    if (v0dot < 0 || v1dot < 0 || v2dot < 0)
-      onLeft = true;
-    if (v0dot >= 0 || v1dot >= 0 || v2dot >= 0)
-      onRight = true;
-
-    if (onLeft && onRight)
-      onTheLeft.push_back(triangles[i]);
-    else if (onLeft)
-      onTheLeft.push_back(triangles[i]);
+    if (dot(center - bvCenter, spNormal) <= 0)
+      leftTriangles.push_back(triangles[i]);
     else
-      onTheRight.push_back(triangles[i]);
+      rightTriangles.push_back(triangles[i]);
   }
-  
+#endif
   int currIndex = 0;
-  for (int i = 0; i < onTheLeft.size(); ++i)
+  for (int i = 0; i < leftTriangles.size(); ++i)
   {
-    triangles[currIndex++] = onTheLeft[i];
+    triangles[currIndex++] = leftTriangles[i];
   }
-  for (int i = 0; i < onTheRight.size(); ++i)
+  for (int i = 0; i < rightTriangles.size(); ++i)
   {
-    triangles[currIndex++] = onTheRight[i];
+    triangles[currIndex++] = rightTriangles[i];
   }
-  splitPlaneCandidates.clear();
-  return onTheLeft.size();
+  return leftTriangles.size();
 }

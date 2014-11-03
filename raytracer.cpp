@@ -82,7 +82,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 0, -10), vec3(0, 0, 1));
+  camera.Set(vec3(0, 0, -15), vec3(0, 0, 1));
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)

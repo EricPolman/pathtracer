@@ -54,7 +54,8 @@ void Triangle::Intersect(Ray& _Ray)
     _Ray.u = uv.x;
     _Ray.v = uv.y;
     _Ray.intersection.prim = this;
-    _Ray.intersection.N = N;// n0 + u * (n1 - n0) + v * (n2 - n0);
+    _Ray.intersection.N = n0 + u * (n1 - n0) + v * (n2 - n0);
+    _Ray.intersection.geomN = N;
     _Ray.intersection.color = material->color;
     _Ray.lastRefractiveIndex = material->refractionIndex;
     /*

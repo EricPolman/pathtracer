@@ -21,10 +21,12 @@ public:
   void IntersectShadow(Ray& _Ray, float _Length);
   // data members
   BvhNode* bvhRoot;
+  AABB rootBox;
   Primitive** primList;
   std::vector<Triangle*> triangles;
   std::vector<Material*> materials;
   int primCount;
+
 
   Primitive** lightList;
   int lightCount;

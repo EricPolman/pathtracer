@@ -14,7 +14,7 @@
 using namespace Tmpl8;
 using namespace glm;
 
-std::_Bind<false, void, Distribution, Engine> Random::_r(std::bind(Distribution(0.0f, 1.0f), Engine((int)time(NULL))));
+std::_Bind<false, void, Distribution, Engine> Random::value(std::bind(Distribution(0.0f, 1.0f), Engine((int)time(NULL))));
 
 #include "raytracer.h"
 

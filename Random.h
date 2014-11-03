@@ -9,11 +9,9 @@ using std::uniform_real_distribution;
 typedef mt19937                                     Engine;
 typedef uniform_real_distribution<float>            Distribution;
 
-
 class Random
 {
 public:
-  static float value(){ return _r(); }
+  static std::_Bind<false, void, Distribution, Engine> value;
 private:
-  static std::_Bind<false, void, Distribution, Engine> _r;
 };

@@ -11,7 +11,7 @@
 
 Mesh* mesh;
 Texture* texture;
-auto path = "resources/box_rot.obj";
+auto path = "resources/mace_hq.obj";
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
 // Sponza from: http://graphics.cs.williams.edu/data/meshes.xml
 
@@ -24,6 +24,7 @@ Scene::Scene()
   //SetupSphereScene();
   materials.push_back(new Material);
   materials[0]->type = Material::PHONG;
+  //materials[0]->color = vec3(0.3f, 0.3f, 0.3f);
   materials[0]->id = 0;
   SetupHeavyScene();
   BuildBVH();
@@ -54,7 +55,7 @@ void Scene::SetupSphereScene()
 
   primList[0]->material->type = Material::PHONG;
   primList[5]->material->type = Material::DIELECTRIC;
-  primList[5]->material->refractionIndex = 1.5f;
+  primList[5]->material->refractionIndex = 1.4f;
   //primList[6]->material->color = vec3(0.9f, 0.7f, 0.7f);
   primList[6]->material->color = vec3(0.95f, 0.8f, 0.4f);
   primList[6]->material->type = Material::MIRROR;
@@ -80,20 +81,21 @@ void Scene::SetupHeavyScene()
   primList[primCount++] = new Plane(vec3(0, -1, 0), -20);
   primList[primCount++] = new Plane(vec3(-1, 0, 0), -20);
   primList[primCount++] = new Plane(vec3(1, 0, 0), -20);
-  primList[primCount++] = new Plane(vec3(0, 1, 0), -20);
+  primList[primCount++] = new Plane(vec3(0, 1, 0), -4);
   primList[primCount++] = new Plane(vec3(0, 0, -1), -20);
   primList[primCount++] = new Plane(vec3(0, 0, 1), -20);
 
   primList[0]->material->type = Material::LIGHT;
+  primList[0]->material->color *= 2.0f;
   primList[1]->material->color = vec3(1, 0, 0);
   primList[2]->material->color = vec3(0, 1, 0);
   primList[3]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[4]->material->color = vec3(0.5f, 0.5f, 0.5f);
   primList[5]->material->color = vec3(0.5f, 0.5f, 0.5f);
 
-  //primList[primCount++] = new Sphere(vec3(0, 0, -6), 2);
-  //primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  //primList[primCount - 1]->material->refractionIndex = 1.4f;
+  primList[primCount++] = new Sphere(vec3(0, 0, -10), 2);
+  primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  primList[primCount - 1]->material->refractionIndex = 1.5f;
 
   printf("Loading texture.\n");
   texture = new Texture();
@@ -117,11 +119,11 @@ void Scene::SetupHeavyScene()
 void Scene::BuildBVH()
 {
   printf("Generating BV for entire mesh.\n");
-  AABB bv = AABB::CreateFromTriangles(&triangles[0], triangles.size());
+  rootBox = AABB::CreateFromTriangles(&triangles[0], triangles.size());
   printf("Done generating BV.\n");
-  bvhRoot = new BvhNode(bv.boundMin, bv.boundMax);
+  bvhRoot = new BvhNode(rootBox.boundMin, rootBox.boundMax);
   printf("Building root node.\n");
-  bvhRoot->Build(&triangles[0], triangles.size());
+  bvhRoot->Build(&triangles[0], triangles.size(), rootBox, -1);
 
   printf("Going through splitQueue.\n");
   while (BvhNode::splitQueue.size() > 0)
@@ -129,8 +131,7 @@ void Scene::BuildBVH()
     SplitInstruction instr = BvhNode::splitQueue.front();
     BvhNode::splitQueue.pop();
 
-    printf("%i\t%i\t%p\n", instr.count, instr.p, instr.node);
-
+    printf("%i\t%i\t%i\n", instr.p, instr.count, instr.depth);
     //if (instr.p == instr.count)
     //  continue;
 
@@ -142,14 +143,14 @@ void Scene::BuildBVH()
       // Get BV for right
       instr.node->left = new BvhNode(bvLeft.boundMin, bvLeft.boundMax);
 
-      instr.node->left->Build(instr.tris, instr.p);
+      instr.node->left->Build(instr.tris, instr.p, rootBox, instr.depth);
     }
     if (instr.p < instr.count)
     {
       AABB bvRight = AABB::CreateFromTriangles(instr.tris + instr.p, instr.count - instr.p);
       instr.node->right = new BvhNode(bvRight.boundMin, bvRight.boundMax);
 
-      instr.node->right->Build(instr.tris + instr.p, instr.count - instr.p);
+      instr.node->right->Build(instr.tris + instr.p, instr.count - instr.p, rootBox, instr.depth);
     }
   }
   printf("BVH done.\n");

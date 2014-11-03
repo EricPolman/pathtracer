@@ -4,14 +4,18 @@
 using namespace glm;
 
 class Primitive;
+class Ray;
 
 class Intersection
 {
 public:
-  vec3 N;							// normal at intersection point
+  Intersection() : directLight(nullptr) {}
+  ~Intersection() { delete directLight; }
+  vec3 N, geomN;							// normal at intersection point
   vec3 color;						// color at intersection point
   vec3 position;
   Primitive* prim;
+  Ray* directLight;
 };
 
 class Ray
