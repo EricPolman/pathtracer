@@ -29,6 +29,7 @@ extern "C"
 #include "fcntl.h"
 #include <time.h>
 #include "InputManager.h"
+#include "JobDelegator.h"
 
 namespace Tmpl8 { 
 void NotifyUser( char* s )
@@ -84,6 +85,8 @@ void redirectIO()
 
 int main( int argc, char **argv ) 
 {  
+  JobDelegator::singleton = new JobDelegator();
+  JobSys->CreateThreads();
 	redirectIO();
 	printf( "application started.\n" );
 	SDL_Init( SDL_INIT_VIDEO );

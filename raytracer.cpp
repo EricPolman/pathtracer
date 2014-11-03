@@ -15,8 +15,12 @@ using namespace glm;
 #include <thread>
 #include <functional>
 #include "BvhNode.h"
+#include "JobDelegator.h"
 
 extern Surface* screen; // defined in template.cpp
+
+Renderer* RenderTileJob::renderer;
+RenderTileJob renderJobs[SCRHEIGHT / TILE_SIZE][SCRWIDTH / 2 / TILE_SIZE];
 
 // draw a line using world space coordinates
 void Renderer::Line2D( float x1, float y1, float x2, float y2, unsigned int c )
@@ -83,6 +87,15 @@ void Scene::Draw2D()
 Renderer::Renderer()
 {
   camera.Set(vec3(0, 0, -15), vec3(0, 0, 1));
+  RenderTileJob::renderer = this;
+  for (int y = 0; y < SCRHEIGHT / TILE_SIZE; ++y)
+  {
+    for (int x = 0; x < SCRWIDTH / 2 / TILE_SIZE; ++x)
+    {
+      renderJobs[y][x].x = x * TILE_SIZE;
+      renderJobs[y][x].y = y * TILE_SIZE;
+    }
+  }
 }
 
 vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
@@ -184,6 +197,46 @@ void Renderer::RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer,
   }
 }
 
+void Renderer::RenderTilePathTraced(int _X, int _Y, int _TileSize, Pixel* _Buffer, Renderer* _Renderer)
+{
+  for (int y = _Y; y < _Y + _TileSize; ++y)
+  {
+    for (int x = _X; x < _X + _TileSize; ++x)
+    {
+      // generate primary ray
+      Ray ray = _Renderer->camera.GenerateRay(x, y);
+      // trace primary ray
+#ifdef _DEBUG
+      if (Input->IsMouseButtonDown(SDL_BUTTON_LEFT))
+      {
+        if (y == Input->GetMousePosition().y && x == Input->GetMousePosition().x)
+        {
+          __debugbreak();
+        }
+      }
+#endif
+
+      vec3 color = _Renderer->TracePath(ray, 1);
+      // visualize ray in 2D if y == 0, and for every 16th pixel
+
+      // visualize intersection result
+      //_Screen->Plot(x, y, ConvertColor(color));
+      if (glm::length(color) > MAX_BRIGHTNESS)
+      {
+        color = normalize(color) * MAX_BRIGHTNESS;
+      }
+
+      _Renderer->accumulatedColours[y][x] += color;
+      _Renderer->frameCounter[y][x] += 1;
+    }
+    for (int ix = 0; ix < SCRWIDTH / 2; ++ix)
+    {
+      _Buffer[ix + y * (SCRWIDTH)] =
+        ConvertColor(_Renderer->accumulatedColours[y][ix] * (1.0f / _Renderer->frameCounter[y][ix]));
+    }
+  }
+}
+
 int currentY = 0;
 void Renderer::Render( )
 {
@@ -202,17 +255,22 @@ void Renderer::Render( )
     }
   }
 
-  const static int THREADS = 4;
-  std::thread threads[THREADS];
-
-  for (int t = 0; t < THREADS; ++t)
+  if (JobSys->Count() < SCRHEIGHT * SCRWIDTH * 2)
   {
-    threads[t] = std::thread(&Renderer::RenderLinePathTraced, t * SCRHEIGHT / THREADS, screen->GetBuffer(), this, SCRHEIGHT / THREADS);
+    for (int y = 0; y < SCRHEIGHT / TILE_SIZE; ++y)
+    {
+      for (int x = 0; x < SCRWIDTH / 2 / TILE_SIZE; ++x)
+      {
+        JobSys->Queue(&renderJobs[y][x]);
+      }
+    }
   }
-  for (int t = 0; t < THREADS; t++)
-  {
-    threads[t].join();
-  }
+  JobSys->Delegate();
 }
 
+
+void RenderTileJob::Execute()
+{
+  Renderer::RenderTilePathTraced(x, y, TILE_SIZE, screen->GetBuffer(), renderer);
+}
 // EOF

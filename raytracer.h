@@ -21,6 +21,7 @@ public:
   vec3 TracePath(Ray& _Ray, float _CurrentProbability, unsigned int _Debug = 0);
 	void Render();
   static void RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer, int _linesToRender);
+  static void RenderTilePathTraced(int _X, int _Y, int _TileSize, Pixel* _Buffer, Renderer* _Renderer);
 	// data members
 	Scene scene;
 	Camera camera;
