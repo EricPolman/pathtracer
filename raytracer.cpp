@@ -88,7 +88,7 @@ void Scene::Draw2D()
 //    --------------
 Renderer::Renderer()
 {
-  camera.Set(vec3(0, 1, -10), vec3(0, 0, 1));
+  camera.Set(vec3(0, 1, -20), vec3(0, 0, 1));
   skyDome = new Texture();
   skyDome->Load("resources/sky.jpg");
   RenderTileJob::renderer = this;
