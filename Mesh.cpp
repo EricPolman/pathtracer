@@ -68,6 +68,11 @@ void ParseMtl(const char* a_path, std::map<std::string, int>& idMap)
     {
       fscanf(file, "%f %f %f\n", &mat->color.r, &mat->color.g, &mat->color.b);
     }
+    else if (strcmp(lineHeader, "Ns") == 0)
+    {
+      mat->type = Material::PHONG;
+      fscanf(file, "%f\n", &mat->specularComponent);
+    }
     else if (strcmp(lineHeader, "map_Kd") == 0)
     {
       char rest[128];
