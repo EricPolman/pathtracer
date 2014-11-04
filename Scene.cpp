@@ -8,6 +8,8 @@
 #include "Mesh.h"
 #include "Texture.h"
 
+#define SCENE_PATH "resources/prettyScene/all.obj"
+
 Mesh* mesh;
 Texture* texture;
 // Sponza from: http://hdri.cgtechniques.com/~sponza/files/
@@ -33,10 +35,10 @@ void Scene::SetupScene()
 {
   primList[primCount++] = new Plane(vec3(0, 1, 0), -1);
 
-  //primList[primCount++] = new Sphere(vec3(0, 1.5f, -6), 1.0f);
-  //primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  //primList[primCount - 1]->material->refractionIndex = 1.4f;
-  //primList[primCount - 1]->material->color = vec3(1.0f, 1.0f, 1.0f);
+  primList[primCount++] = new Sphere(vec3(0, 1.5f, -6), 1.0f);
+  primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  primList[primCount - 1]->material->refractionIndex = 1.4f;
+  primList[primCount - 1]->material->color = vec3(1.0f, 1.0f, 1.0f);
   //
   //
   //primList[primCount++] = new Sphere(vec3(-4.0f, 2.5f, 2), 2);
@@ -48,7 +50,7 @@ void Scene::SetupScene()
   //primList[primCount - 1]->material->type = Material::MIRROR;
 
   printf("Parsing mesh.\n");
-  mesh = new Mesh("resources/prettyScene/all.obj");
+  mesh = new Mesh(SCENE_PATH);
   for (auto i : mesh->m_triangles)
   {
     triangles.push_back(i);

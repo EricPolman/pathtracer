@@ -151,8 +151,7 @@ vec3 Renderer::TracePath(Ray& _Ray, float _CurrentProbability, bool _CheckBVH, u
     uv.y = fabsf(uv.y);
     return skyDome->GetPixel(uv.x, uv.y) / ROULETTE_SURVIVAL_CHANCE;
   }
-  //if (depth > MAX_TRACE_DEPTH)
-  //  return _Ray.intersection.color;
+
   vec3 color;
   float roulette = Random::value();
   if (roulette < ROULETTE_SURVIVAL_CHANCE) // Kill chance
