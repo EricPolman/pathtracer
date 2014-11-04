@@ -2,6 +2,7 @@
 #include "Ray.h"
 #include "Primitive.h"
 #include "definitions.h"
+#include "emmintrin.h"
 
 namespace Tmpl8
 {
@@ -23,7 +24,13 @@ public:
   void Trace(Renderer& _Renderer, Scene& _Scene);
   bool IntersectAABB(const AABB& box);
   void GenerateFrustum();
-  vec3 frustumPlanes[6];
-  vec3 frustumPlanePositions[6];
+
+  // Frustum
+  union { __m128 Px4; float Px[4]; };
+  union { __m128 Py4; float Py[4]; };
+  union { __m128 Pz4; float Pz[4]; };
+  union { __m128 Nx4; float Nx[4]; };
+  union { __m128 Ny4; float Ny[4]; };
+  union { __m128 Nz4; float Nz[4]; };
 };
 

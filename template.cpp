@@ -93,7 +93,7 @@ int main( int argc, char **argv )
 	screen = new Surface( SCRWIDTH, SCRHEIGHT );
 	screen->Clear( 0 );
 	screen->InitCharset();
-	SDL_Window* window = SDL_CreateWindow( "Template", 100, 100, SCRWIDTH, SCRHEIGHT, SDL_WINDOW_SHOWN );
+	SDL_Window* window = SDL_CreateWindow( "TracyPathy - 130048", 100, 100, SCRWIDTH, SCRHEIGHT, SDL_WINDOW_SHOWN );
 	SDL_Renderer* renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	SDL_Texture* frameBuffer = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCRWIDTH, SCRHEIGHT );
 	int exitapp = 0;

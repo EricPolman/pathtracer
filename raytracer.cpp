@@ -131,6 +131,7 @@ vec3 Renderer::Trace(Ray& _Ray, int depth, unsigned int _Debug)
   }
   return color;
 }
+
 vec3 Renderer::TracePath(Ray& _Ray, float _CurrentProbability, bool _CheckBVH, unsigned int _Debug)
 {
   // intersect a single ray with the objects in the scene
@@ -271,14 +272,11 @@ void Renderer::Render()
     }
   }
 
-  if (JobSys->Count() < SCRHEIGHT * SCRWIDTH * 2)
+  for (int y = 0; y < SCRHEIGHT / PACKET_SIZE; ++y)
   {
-    for (int y = 0; y < SCRHEIGHT / PACKET_SIZE; ++y)
+    for (int x = 0; x < SCRWIDTH / 2 / PACKET_SIZE; ++x)
     {
-      for (int x = 0; x < SCRWIDTH / 2 / PACKET_SIZE; ++x)
-      {
-        JobSys->Queue(&renderJobs[y][x]);
-      }
+      JobSys->Queue(&renderJobs[y][x]);
     }
   }
   JobSys->Delegate();

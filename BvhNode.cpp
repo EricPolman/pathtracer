@@ -227,14 +227,6 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox, fl
         leftTriangles.push_back(triangles[i]);
       if (v0dot >= 0 || v1dot >= 0 || v2dot >= 0)
         rightTriangles.push_back(triangles[i]);
-
-      /*vec3 center = triangles[i]->v0 + triangles[i]->v1 + triangles[i]->v2;
-      center /= 3;
-
-      if (dot(center - splitPlaneCandidates[p].position, splitPlaneCandidates[p].normal) <= 0)
-        leftTriangles.push_back(triangles[i]);
-      else
-        rightTriangles.push_back(triangles[i]);*/
     }
 
     // Calculate costs and evaluate best split
@@ -270,7 +262,6 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox, fl
       rightTriangles.push_back(triangles[i]);
   }
   _rCost = currentBestCost;
-  //_cost = currentBestCost;
 #else
   // Centroid Split approach
   // Get center

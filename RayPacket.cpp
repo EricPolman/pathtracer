@@ -111,56 +111,41 @@ bool RayPacket::IntersectAABB(const AABB &box) {
   const vec3 box5(box7.x, box0.y, box7.z);
   const vec3 box6(box7.x, box7.y, box0.z);
 
-  // for each plane do ...
-  for (int i = 0; i < 6; i++) 
+  // reset counters for corners in and out
+  out = 0; in = 0;
+  // for each corner of the box do ...
+  // get out of the cycle as soon as a box as corners
+  // both inside and out of the frustum
+  for (int k = 0; k < 8 && (in == 0 || out == 0); k++)
   {
-    // reset counters for corners in and out
-    out = 0; in = 0;
-    // for each corner of the box do ...
-    // get out of the cycle as soon as a box as corners
-    // both inside and out of the frustum
+    const vec3& b = *(&box0 + k);
+    __m128 Bx4 = _mm_set1_ps(b.x);
+    __m128 By4 = _mm_set1_ps(b.y);
+    __m128 Bz4 = _mm_set1_ps(b.z);
 
-    if (dot(frustumPlanes[i], box0 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box1 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box2 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box3 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box4 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box5 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box6 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
-    if (dot(frustumPlanes[i], box7 - frustumPlanePositions[i]) > 0)
-      ++out;
-    else
-      in++;
+    __m128 Dx4 = _mm_sub_ps(Bx4, Px4);
+    __m128 Dy4 = _mm_sub_ps(By4, Py4);
+    __m128 Dz4 = _mm_sub_ps(Bz4, Pz4);
 
-    //if all corners are out
-    if (!in)
-      return false;
-    // if some corners are out and others are in	
-    else if (out)
-      result = true;
+    union
+    {
+      __m128 mul4;
+      float mul[4];
+    };
+    mul4 = _mm_add_ps(_mm_mul_ps(Nx4, Dx4), _mm_add_ps(_mm_mul_ps(Ny4, Dy4), _mm_mul_ps(Nz4, Dz4)));
+
+    if (mul[0] > 0 && mul[1] > 0 && mul[2] > 0 && mul[3] > 0)
+      ++out;
+    else
+      in++;
   }
-  return(result);
+
+  //if all corners are out
+  if (!in)
+    return false;
+  // if some corners are out and others are in	
+  else if (out)
+    return true;
 }
 
 
@@ -176,25 +161,42 @@ void RayPacket::GenerateFrustum()
   vec3 bottomLeftFar = bottomLeft.O + bottomLeft.D * 60.0f;
   vec3 bottomRightFar = bottomRight.O + bottomRight.D * 60.0f;
 
-  frustumPlanes[0] = cross(topRightFar - topRight.O, bottomRightFar - topRight.O); // right
-  frustumPlanes[0] = normalize(frustumPlanes[0]);
-  frustumPlanes[1] = cross(bottomLeftFar - topLeft.O, topLeftFar - topLeft.O); // left
-  frustumPlanes[1] = normalize(frustumPlanes[1]);
+  vec3 frustumPlane = cross(topRightFar - topRight.O, bottomRightFar - topRight.O); // right
+  frustumPlane = normalize(frustumPlane);
+  Nx[0] = frustumPlane.x;
+  Ny[0] = frustumPlane.y;
+  Nz[0] = frustumPlane.z;
 
-  frustumPlanes[2] = cross(topLeftFar - topLeft.O, topRightFar - topLeft.O); // up
-  frustumPlanes[2] = normalize(frustumPlanes[2]);
-  frustumPlanes[3] = cross(bottomRightFar - topLeft.O, bottomLeftFar - topLeft.O); // down
-  frustumPlanes[3] = normalize(frustumPlanes[3]);
+  frustumPlane = cross(bottomLeftFar - topLeft.O, topLeftFar - topLeft.O); // left
+  frustumPlane = normalize(frustumPlane);
+  Nx[1] = frustumPlane.x;
+  Ny[1] = frustumPlane.y;
+  Nz[1] = frustumPlane.z;
 
-  frustumPlanes[4] = cross(bottomRight.O - topLeft.O, topRight.O - topLeft.O); // near
-  frustumPlanes[4] = normalize(frustumPlanes[4]);
-  frustumPlanes[5] = cross(bottomRightFar - topLeftFar, topRightFar - topLeftFar); // far
-  frustumPlanes[5] = normalize(frustumPlanes[5]);
+  frustumPlane = cross(topLeftFar - topLeft.O, topRightFar - topLeft.O); // up
+  frustumPlane = normalize(frustumPlane);
+  Nx[2] = frustumPlane.x;
+  Ny[2] = frustumPlane.y;
+  Nz[2] = frustumPlane.z;
 
-  frustumPlanePositions[0] = topRightFar;
-  frustumPlanePositions[1] = topLeftFar;
-  frustumPlanePositions[2] = topLeftFar;
-  frustumPlanePositions[3] = bottomLeftFar;
-  frustumPlanePositions[4] = topLeft.O;
-  frustumPlanePositions[5] = topLeftFar;
+  frustumPlane = cross(bottomRightFar - topLeft.O, bottomLeftFar - topLeft.O); // down
+  frustumPlane = normalize(frustumPlane);
+  Nx[3] = frustumPlane.x;
+  Ny[3] = frustumPlane.y;
+  Nz[3] = frustumPlane.z;
+
+  Px[0] = topRightFar.x;
+  Px[1] = topLeftFar.x;
+  Px[2] = topLeftFar.x;
+  Px[3] = bottomLeftFar.x;
+
+  Py[0] = topRightFar.y;
+  Py[1] = topLeftFar.y;
+  Py[2] = topLeftFar.y;
+  Py[3] = bottomLeftFar.y;
+
+  Pz[0] = topRightFar.y;
+  Pz[1] = topLeftFar.y;
+  Pz[2] = topLeftFar.y;
+  Pz[3] = bottomLeftFar.y;
 }

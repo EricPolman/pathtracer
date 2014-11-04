@@ -13,8 +13,8 @@
 #define SX(x) ((((x)-(WXMIN))/((WXMAX)-(WXMIN)))*(SCRWIDTH/2)+SCRWIDTH/2)
 #define SY(y) ((((-y)-(WYMIN))/((WYMAX)-(WYMIN)))*SCRHEIGHT) // trust me
 
-#define SCRWIDTH	1024
-#define SCRHEIGHT	512
+#define SCRWIDTH	(1024)
+#define SCRHEIGHT	(512)
 
 #define MIN(a,b) (((a)>(b))?(b):(a))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -40,6 +40,6 @@
 
 #define MAX_BRIGHTNESS 8.0f
 
-#define PACKET_SIZE 64
+#define PACKET_SIZE 32
 
 typedef unsigned long Pixel;
