@@ -86,19 +86,24 @@ void Game::Tick( float dt )
     renderer.camera.eyePos.y -= dt;
     movement = true;
   }
-  
+
   if (Input->IsMouseButtonDown(SDL_BUTTON_RIGHT))
   {
     renderer.camera.rotation *= glm::angleAxis(0.02f * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(0.02f * mouseMovement.y * 4000, vec3(1, 0, 0));
     movement = true;
   }
-
-  if (Input->IsKeyDown(SDLK_r))
+  if (Input->IsMouseButtonDown(SDL_BUTTON_LEFT))
   {
-    renderer.scene.primList[1]->material->refractionIndex += 0.25f;
-    printf("%f\n", renderer.scene.primList[1]->material->refractionIndex);
-  }
-  
+    if (mousePosition.x < SCRWIDTH / 2 && mousePosition.x > 0 && 
+      mousePosition.y < SCRHEIGHT && mousePosition.y > 0)
+    {
+      Ray r = renderer.camera.GenerateSimpleRay(mousePosition.x, mousePosition.y);
+      renderer.TracePath(r, 1, true, 0);
+      renderer.camera.focusDistance = r.t;
+    }
+    //renderer.camera. *= glm::angleAxis(0.02f * mouseMovement.x * 4000, vec3(0, 1, 0)) * glm::angleAxis(0.02f * mouseMovement.y * 4000, vec3(1, 0, 0));
+    movement = true;
+  }  
 
   if (movement)
   {

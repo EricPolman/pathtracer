@@ -18,6 +18,7 @@ public:
 
   void Draw2D();
   void Intersect(Ray& _Ray);
+  void IntersectBVH(Ray& _Ray, BvhNode* startNode = nullptr);
   void IntersectShadow(Ray& _Ray, float _Length);
   // data members
   BvhNode* bvhRoot;

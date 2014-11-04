@@ -178,6 +178,7 @@ int main( int argc, char **argv )
     }
     Input->Update(fDeltaTime);
 	}
+  JobSys->Terminate();
 	game->Shutdown();
 	SDL_Quit();
 	return 1;

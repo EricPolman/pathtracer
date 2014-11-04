@@ -87,9 +87,15 @@ void Scene::SetupHeavyScene()
 {
   primList[primCount++] = new Plane(vec3(0, 1, 0), -1);
 
-  primList[primCount++] = new Sphere(vec3(0, 1, -13), 2);
+  primList[primCount++] = new Sphere(vec3(3, 1, -5), 1.5f);
   primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  primList[primCount - 1]->material->refractionIndex = 1.4f;
+  primList[primCount - 1]->material->refractionIndex = 1.2f;
+  primList[primCount - 1]->material->color = vec3(1.0f, 0.85f, 0.7f);
+
+  primList[primCount++] = new Sphere(vec3(-3, 1, -5), 1.5f);
+  primList[primCount - 1]->material->color = vec3(0.7f, 0.85f, 1.0f);
+  primList[primCount - 1]->material->type = Material::DIELECTRIC;
+  primList[primCount - 1]->material->refractionIndex = 1.2f;
 
   printf("Parsing mesh.\n");
   mesh = new Mesh("resources/prettyScene/all.obj");
@@ -132,9 +138,44 @@ void Scene::BuildBVH()
 
 void Scene::Intersect(Ray& _Ray)
 {
-  // intersect ray with each primitive in the scene
   for (int i = 0; i < primCount; i++) primList[i]->Intersect(_Ray);
-  bvhRoot->Intersect(_Ray);
+}
+void Scene::IntersectBVH(Ray& _Ray, BvhNode* _StartNode)
+{
+  // Recursion-less BVH traversal, borrowed from Max Oomen
+
+  // intersect ray with each primitive in the scene
+  BvhNode* stack[128];
+  int stackIdx = 0;
+  if(_StartNode == nullptr)
+    stack[stackIdx++] = bvhRoot;
+  else
+    stack[stackIdx++] = _StartNode;
+
+  while (stackIdx)
+  {
+    BvhNode* current = stack[--stackIdx];
+
+    bool hit = current->Intersect(_Ray);
+    if (hit)
+    {
+      if (!current->isLeaf())
+      {
+        if (current->left)
+          stack[stackIdx++] = current->left;
+        if (current->right)
+          stack[stackIdx++] = current->right;
+      }
+      else
+      {
+        for (int i = 0; i < current->numObjects; ++i)
+        {
+          current->tris[i]->Intersect(_Ray);
+        }
+      }
+    }
+  }
+  //bvhRoot->Intersect(_Ray);
 }
 
 void Scene::IntersectShadow(Ray& _Ray, float _Length)

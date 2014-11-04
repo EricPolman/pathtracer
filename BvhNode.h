@@ -35,7 +35,7 @@ public:
 
   void GenerateSplitCandidates(Triangle** triangles, int count, bool _PerTriangle = false);
   void Build(Triangle** triangles, int count, const AABB& _RootBox, int _Depth);
-  int Partition(Triangle** triangles, int count, const AABB& _RootBox);
+  int Partition(Triangle** triangles, int count, const AABB& _RootBox, float& _rCost);
   
   static std::queue<SplitInstruction> splitQueue;
 };

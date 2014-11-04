@@ -80,9 +80,9 @@ vec3 IlluminateLambertPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Mate
 
   vec3 color;
   if (_Material.texture)
-    color = _Renderer.TracePath(newRay, 0.0f, 0) * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
+    color = _Renderer.TracePath(newRay, 0.0f, true) * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
   else
-    color = _Renderer.TracePath(newRay, 0.0f, 0) * _Material.color;
+    color = _Renderer.TracePath(newRay, 0.0f, true) * _Material.color;
   return color;
 }
 
@@ -167,7 +167,7 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
 
     Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
 
-    color = _Renderer.TracePath(newRay, 0.0f, 0);
+    color = _Renderer.TracePath(newRay, 0.0f, true);
 
     if (_Material.texture)
       return color * _Material.color * _Material.texture->GetPixel(_Ray.u, _Ray.v);
@@ -181,7 +181,7 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
 
     Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
 
-    color = _Renderer.TracePath(newRay, 0.0f, 0);
+    color = _Renderer.TracePath(newRay, 0.0f, true);
 
     //float pdf = 1.0f / PI * rndVecDotN;
 
@@ -219,7 +219,7 @@ vec3 IlluminateMirrorPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Mater
   Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);
   // +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.2f);
 
-  vec3 color = _Renderer.TracePath(recursiveRay, 0.0f, 0);
+  vec3 color = _Renderer.TracePath(recursiveRay, 0.0f, true);
   return color * _Material.color;
 }
 
@@ -344,7 +344,7 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
 
       recursiveRay.O = _Ray.intersection.position + T * EPSILON;
 
-      vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug & 0xFF0000);
+      vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, true, _Debug & 0xFF0000);
       //recursiveRay.Draw2D();
       if (leaving) // Absorp according to Beer's law
       {
@@ -365,7 +365,7 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
     vec3 reflectionVector = glm::reflect(_Ray.D, _Ray.intersection.N);
     Ray recursiveRay(_Ray.intersection.position + _Ray.intersection.N * EPSILON, reflectionVector);// +vec3(-0.5f + r(), -0.5f + r(), -0.5f + r()) * 0.05f);
 
-    vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, _Debug);
+    vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, true, _Debug);
     color += col;
   }
   if (_Material.texture)

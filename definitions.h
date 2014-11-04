@@ -40,6 +40,6 @@
 
 #define MAX_BRIGHTNESS 8.0f
 
-#define TILE_SIZE 8
+#define PACKET_SIZE 64
 
 typedef unsigned long Pixel;

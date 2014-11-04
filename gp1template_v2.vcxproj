@@ -131,6 +131,7 @@
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Primitive.cpp" />
     <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="RayPacket.cpp" />
     <ClCompile Include="raytracer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sphere.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Primitive.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="RayPacket.h" />
     <ClInclude Include="raytracer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Singleton.h" />

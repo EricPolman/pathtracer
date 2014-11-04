@@ -6,7 +6,7 @@
 class Camera
 {
 public:
-  Camera(): focusDistance(1) {}
+  Camera(): focusDistance(5.0f) {}
   // methods
   Ray GenerateRay(int _X, int _Y);
   Ray GenerateSimpleRay(int _X, int _Y);

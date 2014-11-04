@@ -70,8 +70,12 @@ void ParseMtl(const char* a_path, std::map<std::string, int>& idMap)
     }
     else if (strcmp(lineHeader, "Ns") == 0)
     {
-      mat->type = Material::PHONG;
-      fscanf(file, "%f\n", &mat->specularComponent);
+      if (mat->type == Material::LAMBERT)
+      {
+        mat->type = Material::PHONG;
+        fscanf(file, "%f\n", &mat->specularComponent);
+        mat->specularComponent += 2.0f;
+      }
     }
     else if (strcmp(lineHeader, "map_Kd") == 0)
     {
@@ -84,6 +88,8 @@ void ParseMtl(const char* a_path, std::map<std::string, int>& idMap)
       texPath.append(rest);
       tex->Load(texPath.c_str());
       mat->color = vec3(1, 1, 1);
+      printf(texPath.c_str());
+      printf("\n%i\n", tex->height);
     }
   }
 

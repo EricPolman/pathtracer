@@ -18,7 +18,8 @@ public:
 	Renderer();
 	// methods
   vec3 Trace(Ray& _Ray, int depth = 0, unsigned int _Debug = 0);
-  vec3 TracePath(Ray& _Ray, float _CurrentProbability, unsigned int _Debug = 0);
+  vec3 TracePath(Ray& _Ray, float _CurrentProbability, bool _CheckBVH, unsigned int _Debug = 0);
+  vec3 TracePath(Ray& _Ray, float _CurrentProbability, BvhNode* startNode); // Used by Ray Packet
 	void Render();
   static void RenderLinePathTraced(int _Y, Pixel* _Buffer, Renderer* _Renderer, int _linesToRender);
   static void RenderTilePathTraced(int _X, int _Y, int _TileSize, Pixel* _Buffer, Renderer* _Renderer);

@@ -57,6 +57,7 @@ void BvhNode::Draw2D()
   Renderer::Line2D(bounds._max.x, bounds._max.z, bounds._min.x, bounds._max.z, 0xff00ff);
 }
 
+// with help from: https://github.com/apartridge/GpuRayTracer/tree/c6ad15089bd6a0b92fdfe6b8dcd2db23505aaa7a/SimSun
 float SurfaceAreaHeuristic(int numLeft, float areaLeft, int numRight, float areaRight, int numMiddle)
 {
   float factor = 1.0f;
@@ -103,21 +104,6 @@ bool BvhNode::Intersect(Ray& _Ray)
 
   if (tmin < _Ray.t)
   {
-    if (isLeaf())
-    {
-      for (int i = 0; i < numObjects; ++i)
-      {
-        tris[i]->Intersect(_Ray);
-      }
-    }
-    else
-    {
-      if (left)
-        left->Intersect(_Ray);
-      if (right)
-        right->Intersect(_Ray);
-    }
-
     return true;
   }
   return false;
@@ -193,9 +179,10 @@ void BvhNode::Build(Triangle** _Tris, int _Count, const AABB& _RootBox, int _Dep
     GenerateSplitCandidates(_Tris, _Count, false);
 
     // Split this thing yo
-    int p = Partition(_Tris, _Count, _RootBox);
+    float cost = 0;
+    int p = Partition(_Tris, _Count, _RootBox, cost);
 
-    if (p == _Count || p == 0)
+    if (p == _Count || p == 0 || cost > COST_INTERSECT * _Count)
     {
       // Is leaf
       tris = _Tris;
@@ -218,7 +205,7 @@ void BvhNode::Build(Triangle** _Tris, int _Count, const AABB& _RootBox, int _Dep
 
 #define USE_SAH
 static int roundRobin = 0;
-int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox)
+int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox, float& _rCost)
 {
   std::vector<Triangle*> leftTriangles, rightTriangles;
   const float rootArea = GetSurfaceArea(_RootBox);
@@ -282,7 +269,7 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox)
     else
       rightTriangles.push_back(triangles[i]);
   }
-
+  _rCost = currentBestCost;
   //_cost = currentBestCost;
 #else
   // Centroid Split approach
