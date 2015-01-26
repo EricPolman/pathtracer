@@ -82,7 +82,7 @@ vec3 IlluminatePhongPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _Materi
   float randRayType = Random::value();
   if (randRayType < _Material.specularCoefficient) // Specular ray
   {
-    vec3 rndVec = RandomSpecularDirection(reflect(_Ray.D, _Ray.intersection.geomN), _Material);
+    vec3 rndVec = RandomSpecularDirection(reflect(_Ray.D, _Ray.intersection.N), _Material);
 
     Ray newRay(_Ray.intersection.position + rndVec * EPSILON, rndVec);
 
@@ -172,7 +172,7 @@ vec3 IlluminateDielectricPathTraced(Renderer& _Renderer, Ray& _Ray, Material& _M
       vec3 col = _Renderer.TracePath(recursiveRay, 0.0f, true, _Debug & 0xFF0000);
       if (leaving) // Absorp according to Beer's law
       {
-        vec3 absorbance = recursiveRay.intersection.color * 0.05f * -recursiveRay.t;
+        vec3 absorbance = recursiveRay.intersection.color * 0.15f * -recursiveRay.t;
         vec3 transparency = vec3(expf(absorbance.r), expf(absorbance.g), expf(absorbance.b));
 
         color += col * transparency;

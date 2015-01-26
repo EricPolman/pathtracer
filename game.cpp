@@ -29,7 +29,6 @@ vec3 startViewDir;
 void Game::Init()
 {
 	// initialization code goes here
-  printf("%i\n", sizeof(BvhNode));
   startViewDir = renderer.camera.V;
 }
 
@@ -37,7 +36,7 @@ void Game::Init()
 void Game::Draw2DView()
 {
   screen->ClipTo(0, 0, SCRWIDTH - 1, SCRHEIGHT - 1);
-	renderer.scene.Draw2D();
+  renderer.scene.Draw2D();
   renderer.camera.Draw2D();
   screen->ClipTo(0, 0, float(SCRWIDTH / 2), float(SCRHEIGHT));
 }
@@ -58,22 +57,22 @@ void Game::Tick( float dt )
 
   if (Input->IsKeyDown(SDLK_LEFT))
   {
-    renderer.camera.eyePos.x -= dt;
+    renderer.camera.eyePos -= dt * renderer.camera.right;
     movement = true;
   }
   if (Input->IsKeyDown(SDLK_RIGHT))
   {
-    renderer.camera.eyePos.x += dt;
+    renderer.camera.eyePos += dt * renderer.camera.right;
     movement = true;
   }
   if (Input->IsKeyDown(SDLK_UP))
   {
-    renderer.camera.eyePos.z += dt;
+    renderer.camera.eyePos += dt * normalize(renderer.camera.V);
     movement = true;
   }
   if (Input->IsKeyDown(SDLK_DOWN))
   {
-    renderer.camera.eyePos.z -= dt;
+    renderer.camera.eyePos -= dt * normalize(renderer.camera.V);
     movement = true;
   }
   if (Input->IsKeyDown(SDLK_KP_4))

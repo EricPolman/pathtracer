@@ -67,8 +67,8 @@ void RayPacket::Trace(Renderer& _Renderer, Scene& _Scene)
     }
     else // Advance to next intersect
     {
-      if (currentNode->isLeaf())
-      {
+      //if (currentNode->isLeaf())
+      //{
         for (int y = 0; y < PACKET_SIZE; ++y)
         {
           for (int x = 0; x < PACKET_SIZE; ++x)
@@ -85,14 +85,14 @@ void RayPacket::Trace(Renderer& _Renderer, Scene& _Scene)
           }
         }
       }
-      else
-      {
-        if (currentNode->left)
-          stack[stackIdx++] = currentNode->left;
-        if (currentNode->right)
-          stack[stackIdx++] = currentNode->right;
-      }
-    }
+      //else
+      //{
+      //  if (currentNode->left)
+      //    stack[stackIdx++] = currentNode->left;
+      //  if (currentNode->right)
+      //    stack[stackIdx++] = currentNode->right;
+      //}
+    //}
   }
 }
 

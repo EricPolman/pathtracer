@@ -1,58 +1,58 @@
-newmtl initialShadingGroup
+newmtl lambert2SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-map_Kd ForestFloor.jpg
+map_Kd cobblestone.jpg
 Ni 1.00
 newmtl lambert3SG
 illum 4
-Kd 0.25 0.20 0.18
+Kd 0.00 0.45 1.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 Ni 1.00
 newmtl lambert4SG
 illum 4
+Kd 0.62 1.00 0.42
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl leafWallSG
+illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-map_Kd texturez_3695.jpg
+map_Kd greenwallfoliage.JPG
 Ni 1.00
-newmtl light_trail1
+newmtl light_2_sg
 illum 4
-Kd 0.00 0.68 1.00
+Kd 1.00 0.00 0.45
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl light_3_sg
+illum 4
+Kd 1.00 0.68 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 Ni 1.00
 newmtl mirror1
 illum 4
-Kd 0.83 0.73 0.60
+Kd 0.50 0.50 0.50
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 Ni 1.00
-Ks 0.50 0.50 0.50
-Ns 16.21
-newmtl mirror2
+newmtl phong1SG
 illum 4
-Kd 0.82 0.94 1.00
+Kd 0.42 0.74 1.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 Ni 1.00
-Ks 0.50 0.50 0.50
+Ks 0.62 0.62 0.62
 Ns 78.00
-newmtl phong3SG
+newmtl redSG
 illum 4
-Kd 0.37 0.62 1.00
+Kd 0.80 0.01 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 Ni 1.00
-Ks 0.50 0.50 0.50
-Ns 18.00
-newmtl somethingAwesome
-illum 4
-Kd 0.84 0.73 0.60
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-Ni 1.00
-Ks 0.50 0.50 0.50
-Ns 18.00

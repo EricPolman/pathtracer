@@ -27,8 +27,4 @@ public:
   static std::vector<Material*> materials;
   static void AddMaterial(Material* mat);
   int primCount;
-
-
-  Primitive** lightList;
-  int lightCount;
 };

@@ -55,15 +55,25 @@ void Triangle::Intersect(Ray& _Ray)
     _Ray.intersection.prim = this;
     if (material->normalMap == nullptr)
     {
-      _Ray.intersection.N = n0 + u * (n1) + v * (n2);
+      _Ray.intersection.N = n0 + u * (n1 - n0) + v * (n2 - n0);
     }
     else
     {
+      _Ray.intersection.N = n0 + u * (n1 - n0) + v * (n2 - n0);/*
       vec3 normalPixel = material->normalMap->GetPixel(_Ray.u, _Ray.v);
+
       vec3 T = vec3(N.z, N.y, -N.x);
       vec3 B = cross(T, N);
-      mat3x3 tbn(T, B, N);
-      _Ray.intersection.N = tbn * normalPixel;
+      mat3x3 tbn(N, T, B);
+
+      glm::mat3x3 m(
+        T.x, B.x, N.x,
+        T.y, B.y, N.y,
+        T.z, B.z, N.z);
+
+      normalPixel = normalPixel * m;
+
+      _Ray.intersection.N = N + normalPixel;*/
     }
     _Ray.intersection.N = normalize(_Ray.intersection.N);
     _Ray.intersection.geomN = N;

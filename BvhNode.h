@@ -21,10 +21,8 @@ public:
 
   BvhNode *left; 
   BvhNode *right;
-  
-  Triangle** tris; 
+
   int numObjects;
-  //BvhNode* right() { return left + 1; }
   bool isLeaf() { return numObjects > 0; }
 
   int depth;
@@ -38,4 +36,7 @@ public:
   int Partition(Triangle** triangles, int count, const AABB& _RootBox, float& _rCost);
   
   static std::queue<SplitInstruction> splitQueue;
+
+  Triangle** tris;
+  //float padding[12];
 };

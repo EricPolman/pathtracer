@@ -8,7 +8,11 @@
 #include "Mesh.h"
 #include "Texture.h"
 
+// Pretty Zelda stuff
 #define SCENE_PATH "resources/prettyScene/all.obj"
+
+// Showcasing path tracer
+//#define SCENE_PATH "resources/showcase.obj"
 
 Mesh* mesh;
 Texture* texture;
@@ -25,7 +29,7 @@ void Scene::AddMaterial(Material* mat)
 Scene::Scene()
 {
   primList = new Primitive*[128]; // todo: this is going to bite us one day
-  primCount = lightCount = 0;
+  primCount = 0;
   
   SetupScene();
   BuildBVH();
@@ -35,9 +39,9 @@ void Scene::SetupScene()
 {
   primList[primCount++] = new Plane(vec3(0, 1, 0), -1);
 
-  primList[primCount++] = new Sphere(vec3(0, 1.5f, -6), 1.0f);
+  primList[primCount++] = new Sphere(vec3(7.079f, 2.369f, 1.576f), 1.5f);
   primList[primCount - 1]->material->type = Material::DIELECTRIC;
-  primList[primCount - 1]->material->refractionIndex = 1.4f;
+  primList[primCount - 1]->material->refractionIndex = 1.6f;
   primList[primCount - 1]->material->color = vec3(1.0f, 1.0f, 1.0f);
   //
   //
@@ -73,7 +77,7 @@ void Scene::BuildBVH()
     SplitInstruction instr = BvhNode::splitQueue.front();
     BvhNode::splitQueue.pop();
 
-    printf("%i\t%i\t%i\n", instr.p, instr.count, instr.depth);
+    //printf("%i\t%i\t%i\n", instr.p, instr.count, instr.depth);
 
     // Get BV for left
     if (instr.p > 0)

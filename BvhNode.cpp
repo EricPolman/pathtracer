@@ -212,6 +212,7 @@ int BvhNode::Partition(Triangle** triangles, int count, const AABB& _RootBox, fl
 #ifdef USE_SAH
   int currentBestCandidate = -10;
   float currentBestCost = 1e34f;
+  //printf("count: %i\n", count);
   for (int p = 0; p < splitPlaneCandidates.size(); ++p)
   {
     leftTriangles.clear();

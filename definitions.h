@@ -13,7 +13,7 @@
 #define SX(x) ((((x)-(WXMIN))/((WXMAX)-(WXMIN)))*(SCRWIDTH/2)+SCRWIDTH/2)
 #define SY(y) ((((-y)-(WYMIN))/((WYMAX)-(WYMIN)))*SCRHEIGHT) // trust me
 
-#define SCRWIDTH	(1024)
+#define SCRWIDTH	(1216)
 #define SCRHEIGHT	(512)
 
 #define MIN(a,b) (((a)>(b))?(b):(a))
